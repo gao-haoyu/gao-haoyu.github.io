@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"gao-haoyu.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Linux基础(2):linux的文件管理Linux进行文件管理的相关指令">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux文件管理">
+<meta property="og:url" content="https://gao-haoyu.github.io/2021/06/19/Linux%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/index.html">
+<meta property="og:site_name" content="小高的学习基地">
+<meta property="og:description" content="Linux基础(2):linux的文件管理Linux进行文件管理的相关指令">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/19/Linux%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/%E6%96%87%E4%BB%B6%E6%98%BE%E7%A4%BA.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/19/Linux%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/%E7%A1%AC%E9%93%BE%E6%8E%A5%E7%A4%BA%E6%84%8F%E5%9B%BE.png">
+<meta property="article:published_time" content="2021-06-19T08:08:18.000Z">
+<meta property="article:modified_time" content="2021-06-19T08:21:53.078Z">
+<meta property="article:author" content="haoyu">
+<meta property="article:tag" content="Linux基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gao-haoyu.github.io/2021/06/19/Linux%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/%E6%96%87%E4%BB%B6%E6%98%BE%E7%A4%BA.png">
+
+<link rel="canonical" href="https://gao-haoyu.github.io/2021/06/19/Linux%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux文件管理 | 小高的学习基地</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小高的学习基地</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">高浩宇的学习记录</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://gao-haoyu.github.io/2021/06/19/Linux%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/photo.jpg">
+      <meta itemprop="name" content="haoyu">
+      <meta itemprop="description" content="清扬似玉须勤学">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小高的学习基地">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux文件管理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-06-19 16:08:18 / 修改时间：16:21:53" itemprop="dateCreated datePublished" datetime="2021-06-19T16:08:18+08:00">2021-06-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="Linux基础-2-linux的文件管理"><a href="#Linux基础-2-linux的文件管理" class="headerlink" title="Linux基础(2):linux的文件管理"></a>Linux基础(2):linux的文件管理</h3><p>Linux进行文件管理的相关指令</p>
+<span id="more"></span>
+<h3 id="1-cd命令"><a href="#1-cd命令" class="headerlink" title="1.cd命令"></a>1.cd命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> 目录名</span><br><span class="line"></span><br><span class="line">//常用命令</span><br><span class="line">gao@gao-VirtualBox:~/桌面$ <span class="built_in">cd</span> /        <span class="comment">#cd /进入根目录</span></span><br><span class="line">gao@gao-VirtualBox:/$ <span class="built_in">cd</span>               <span class="comment">#cd 进入当前用户家目录</span></span><br><span class="line">gao@gao-VirtualBox:~$ <span class="built_in">cd</span> ~             <span class="comment">#cd ~ 进入当前用户家目录</span></span><br><span class="line"></span><br><span class="line">gao@gao-VirtualBox:~$ <span class="built_in">cd</span> /             <span class="comment">#绝对路径进入家目录</span></span><br><span class="line">gao@gao-VirtualBox:/$ <span class="built_in">cd</span> /home/gao</span><br><span class="line"></span><br><span class="line">gao@gao-VirtualBox:~$ <span class="built_in">cd</span> /             <span class="comment">#相对路径进入家目录</span></span><br><span class="line">gao@gao-VirtualBox:/$ <span class="built_in">cd</span> home/gao</span><br><span class="line">gao@gao-VirtualBox:~$ <span class="built_in">cd</span> /</span><br><span class="line">gao@gao-VirtualBox:/$ <span class="built_in">cd</span> ./home/gao</span><br><span class="line">gao@gao-VirtualBox:~$</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-ls命令"><a href="#2-ls命令" class="headerlink" title="2.ls命令"></a>2.ls命令</h3><p>含义：ls就是list 显示文件信息</p>
+<p><strong>2.1.基本指令</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~$ ls                <span class="comment">#显示当前目录下所有的文件名**</span></span><br><span class="line">公共的  模板  视频  图片  文档  下载  音乐  桌面  Qt5.9.0  snap</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~$ ls -a             <span class="comment">#显示当前目录下所有文件，包含隐藏文件（文件名前有.表明有隐藏属性）**                 </span></span><br><span class="line">.       音乐           .<span class="built_in">local</span>                     .vboxclient-clipboard.pid</span><br><span class="line">..      桌面           .mozilla                   .vboxclient-display.pid</span><br><span class="line">公共的  .bash_history  .pki                       .vboxclient-draganddrop.pid</span><br><span class="line">模板    .bash_logout   .profile                   .vboxclient-seamless.pid</span><br><span class="line">视频    .bashrc        Qt5.9.0                    .viminfo</span><br><span class="line">图片    .cache         snap                       .vscode</span><br><span class="line">文档    .config        .ssh</span><br><span class="line">下载    .gnupg         .sudo_as_admin_successful</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~$ ls -l           <span class="comment">#显示每个文件的详细信息**</span></span><br><span class="line">总用量 40</span><br><span class="line">drwxr-xr-x 2 gao gao 4096 4月  16 18:11 公共的</span><br><span class="line">drwxr-xr-x 2 gao gao 4096 4月  16 18:11 模板</span><br><span class="line">drwxr-xr-x 2 gao gao 4096 4月  16 18:11 视频</span><br><span class="line">drwxr-xr-x 2 gao gao 4096 4月  16 18:11 图片</span><br><span class="line">drwxr-xr-x 2 gao gao 4096 4月  16 18:11 文档</span><br><span class="line">drwxr-xr-x 3 gao gao 4096 5月  24 20:01 下载</span><br><span class="line">drwxr-xr-x 2 gao gao 4096 4月  16 18:11 音乐</span><br><span class="line">drwxr-xr-x 4 gao gao 4096 6月   9 10:52 桌面</span><br><span class="line">drwxrwxr-x 8 gao gao 4096 4月  17 11:18 Qt5.9.0</span><br><span class="line">drwxr-xr-x 3 gao gao 4096 4月  16 18:12 snap</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~$ ls -F             <span class="comment">#若是文件夹后面跟/符号**</span></span><br><span class="line">公共的/  模板/  视频/  图片/  文档/  下载/  音乐/  桌面/  Qt5.9.0/  snap/</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~$ ls -lFh      <span class="comment">#组合使用，h的作用使得显示的文件大小符合常规方式**</span></span><br><span class="line">总用量 40K</span><br><span class="line">drwxr-xr-x 2 gao gao 4.0K 4月  16 18:11 公共的/</span><br><span class="line">drwxr-xr-x 2 gao gao 4.0K 4月  16 18:11 模板/</span><br><span class="line">drwxr-xr-x 2 gao gao 4.0K 4月  16 18:11 视频/</span><br><span class="line">drwxr-xr-x 2 gao gao 4.0K 4月  16 18:11 图片/</span><br><span class="line">drwxr-xr-x 2 gao gao 4.0K 4月  16 18:11 文档/</span><br><span class="line">drwxr-xr-x 3 gao gao 4.0K 5月  24 20:01 下载/</span><br><span class="line">drwxr-xr-x 2 gao gao 4.0K 4月  16 18:11 音乐/</span><br><span class="line">drwxr-xr-x 4 gao gao 4.0K 6月   9 10:52 桌面/</span><br><span class="line">drwxrwxr-x 8 gao gao 4.0K 4月  17 11:18 Qt5.9.0/</span><br><span class="line">drwxr-xr-x 3 gao gao 4.0K 4月  16 18:12 snap/</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.2.得到的文件信息的具体含义</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 文件详细信息介绍</span></span><br><span class="line"> d      rwx       r-x     r-x     3     gao      gao     4.0K   4月  16 18:12   snap/</span><br><span class="line"> |       |         |       |      |      |        |       |          |	          |</span><br><span class="line">文件    文件所    文件所   其他人 硬链接  文件     文件   文件大小  文件修改时间     文件名</span><br><span class="line">类型   有者权限  属组权限  权限   计数   所有者   所属组 </span><br></pre></td></tr></table></figure>
+
+<p>Linux包含的文件类型</p>
+<p>-:普通的文件，在 Linux 终端中没有执行权限的为白色，压缩包为红色，可执行程序为绿色字体<br>d: 目录 (directory), 在 Linux 终端中为蓝色字体，如果目录的所有权限都是开放的，有绿色的背景色<br>l: 软链接文件 (link), 相当于 windows 中的快捷方式，在 Linux 终端中为淡蓝色 (青色) 字体<br>c: 字符设备 (char), 在 Linux 终端中为黄色字体<br>b: 块设备 (block), 在 Linux 终端中为黄色字体<br>p: 管道文件 (pipe), 在 Linux 终端中为棕黄色字体<br>s: 本地套接字文件 (socket), 在 Linux 终端中为粉色字体</p>
+<p><img src="/2021/06/19/Linux%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/%E6%96%87%E4%BB%B6%E6%98%BE%E7%A4%BA.png" alt="文件显示"></p>
+<p>权限的问题</p>
+<p>文件所属者，指拥有该文件的用户，一般具有所有权限。该用户属于某一用户组，用户组的其他成员对该文件具有一定权限，其他人也具有一定权限。</p>
+<p>权限的类型：读权限（r）,写权限（w）,执行权限（x）,无权限（-）</p>
+<p>以最初的文件信息举例；所有者权限（rwx，读写执行），所属组权限（r-x,读执行）</p>
+<p>硬链接记数</p>
+<p>记录文件有多少别名，有多少均指向同一块内存</p>
+<p><img src="/2021/06/19/Linux%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/%E7%A1%AC%E9%93%BE%E6%8E%A5%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="硬链接示意图"></p>
+<h3 id="3-mkdir创建目录-amp-amp-rm删除目录"><a href="#3-mkdir创建目录-amp-amp-rm删除目录" class="headerlink" title="3.mkdir创建目录&amp;&amp;rm删除目录"></a>3.mkdir创建目录&amp;&amp;rm删除目录</h3><p><strong>创建目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~$ mkdir <span class="built_in">test</span>                <span class="comment">#创建单级目录</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ mkdir a b       <span class="comment">#创建多个单级目录**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── a</span><br><span class="line">└── b</span><br><span class="line"></span><br><span class="line">2 directories, 0 files</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~$ mkdir <span class="built_in">test</span>/hello/nihao/iam/gao -p <span class="comment">#创建多级目录**</span></span><br><span class="line">irtualBox:~/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">└── hello</span><br><span class="line">    └── nihao</span><br><span class="line">        └── iam</span><br><span class="line">            └── gao</span><br></pre></td></tr></table></figure>
+
+<p><strong>删除目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ rmdir hello      <span class="comment">#只能删除单目录，不能包含子目录**</span></span><br><span class="line">rmdir: 删除 <span class="string">&#x27;hello&#x27;</span> 失败: 目录非空</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ rm hello -r      <span class="comment">#既可以删除文件也可以删除目录，删目录需要 -r**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line"></span><br><span class="line">0 directories, 0 files</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ rm a -ri     <span class="comment">#带有提示的删除所有文件**</span></span><br><span class="line">rm：是否进入目录<span class="string">&#x27;a&#x27;</span>? y</span><br><span class="line">rm：是否进入目录<span class="string">&#x27;a/b&#x27;</span>? y</span><br><span class="line">rm：是否进入目录<span class="string">&#x27;a/b/c&#x27;</span>? n</span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">└── a</span><br><span class="line">    └── b</span><br><span class="line">        └── c</span><br><span class="line">            └── d</span><br><span class="line"></span><br><span class="line">4 directories, 0 files</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ rm a -rf       <span class="comment">#不带提示，直接删除**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line"></span><br><span class="line">0 directories, 0 files</span><br></pre></td></tr></table></figure>
+
+<p>注：也可以这种写法 <strong>rm -rf 文件名</strong></p>
+<h3 id="4-cp命令拷贝文件"><a href="#4-cp命令拷贝文件" class="headerlink" title="4.cp命令拷贝文件"></a>4.cp命令拷贝文件</h3><p><strong>两种用法</strong><br>拷贝文件：cp 文件a 文件b      #将a复制一份到b上</p>
+<p>拷贝目录：cp 目录A 目录B -r     #将目录A拷贝到目录B中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/b$ ls -l</span><br><span class="line">总用量 8</span><br><span class="line">-rw-rw-r-- 1 gao gao 10 6月  19 13:53 a</span><br><span class="line">-rw-rw-r-- 1 gao gao  9 6月  19 13:53 b</span><br><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/b$ cp a c     <span class="comment">#cp一个文件a到另一个之前并未存在的文件c，自动生成c**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/b$ ls -l</span><br><span class="line">总用量 12</span><br><span class="line">-rw-rw-r-- 1 gao gao 10 6月  19 13:53 a</span><br><span class="line">-rw-rw-r-- 1 gao gao  9 6月  19 13:53 b</span><br><span class="line">-rw-rw-r-- 1 gao gao 10 6月  19 13:54 c   <span class="comment">#新创建的文件</span></span><br><span class="line"></span><br><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/b$ cp a b  <span class="comment">#cp一个文件a到另一个之前存在的文件b,覆盖原文件**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/b$ ls -lh</span><br><span class="line">总用量 12K</span><br><span class="line">-rw-rw-r-- 1 gao gao 10 6月  19 13:53 a</span><br><span class="line">-rw-rw-r-- 1 gao gao 10 6月  19 13:57 b   <span class="comment">#被覆盖的文件</span></span><br><span class="line">-rw-rw-r-- 1 gao gao 10 6月  19 13:54 c</span><br></pre></td></tr></table></figure>
+
+<p>拷贝文件，有则覆盖，无则新建</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ cp b/ d -r   <span class="comment">#d事先不存在**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── a</span><br><span class="line">├── b</span><br><span class="line">│   ├── a</span><br><span class="line">│   ├── b</span><br><span class="line">│   └── c</span><br><span class="line">├── c</span><br><span class="line">└── d</span><br><span class="line">    ├── a</span><br><span class="line">    ├── b</span><br><span class="line">    └── c</span><br><span class="line"></span><br><span class="line">4 directories, 6 files</span><br><span class="line"></span><br><span class="line"><span class="comment">##注意点：目录名后面加/， 指令后要加-r,递归拷贝全部。</span></span><br><span class="line"><span class="comment">##：目录之前不存在则自动创建</span></span><br><span class="line"><span class="comment">##：目录之前存在则，将目录A添加为目录B的子目录</span></span><br><span class="line"></span><br><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ cp b a/ -r   <span class="comment">#a事先已经存在**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── a</span><br><span class="line">│   └── b</span><br><span class="line">│       ├── a</span><br><span class="line">│       ├── b</span><br><span class="line">│       └── c</span><br><span class="line">├── b</span><br><span class="line">│   ├── a</span><br><span class="line">│   ├── b</span><br><span class="line">│   └── c</span><br><span class="line">├── c</span><br><span class="line">└── d</span><br><span class="line">    ├── a</span><br><span class="line">    ├── b</span><br><span class="line">    └── c</span><br><span class="line"></span><br><span class="line">5 directories, 9 files</span><br><span class="line"></span><br><span class="line"><span class="comment">##一种特殊情况：拷贝目录中的文件</span></span><br><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ cp d/c a/ -r  <span class="comment">#拷贝d中的c到a目录下**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── a</span><br><span class="line">│   ├── b</span><br><span class="line">│   │   ├── a</span><br><span class="line">│   │   ├── b</span><br><span class="line">│   │   └── c</span><br><span class="line">│   └── c</span><br><span class="line">├── b</span><br><span class="line">│   ├── a</span><br><span class="line">│   ├── b</span><br><span class="line">│   └── c</span><br><span class="line">├── c</span><br><span class="line">└── d</span><br><span class="line">    ├── a</span><br><span class="line">    ├── b</span><br><span class="line">    └── c</span><br><span class="line"></span><br><span class="line">5 directories, 11 files</span><br><span class="line"></span><br><span class="line">cp 目录A/* 目录B -r,拷贝A中所有文件到目录B下</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-mv命令移动（改名）（覆盖）文件"><a href="#5-mv命令移动（改名）（覆盖）文件" class="headerlink" title="5.mv命令移动（改名）（覆盖）文件"></a>5.mv命令移动（改名）（覆盖）文件</h3><p><strong>文件移动</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── b</span><br><span class="line">│   ├── a</span><br><span class="line">│   ├── b</span><br><span class="line">│   └── c</span><br><span class="line">└── c</span><br><span class="line"></span><br><span class="line">2 directories, 3 files</span><br><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ mv b/a c/    <span class="comment">#将一个文件移动到另一个目录下**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── b</span><br><span class="line">│   ├── b</span><br><span class="line">│   └── c</span><br><span class="line">└── c</span><br><span class="line">    └── a</span><br><span class="line"></span><br><span class="line">2 directories, 3 files</span><br></pre></td></tr></table></figure>
+
+<p><strong>文件改名：mv到新文件名，即是改名</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ mv c/ d/   <span class="comment">#改目录名**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── b</span><br><span class="line">│   ├── b</span><br><span class="line">│   └── c</span><br><span class="line">└── d</span><br><span class="line">    └── a</span><br><span class="line"></span><br><span class="line">2 directories, 3 files</span><br><span class="line"></span><br><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/d$ mv a d    <span class="comment">#改文件名**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── b</span><br><span class="line">│   ├── b</span><br><span class="line">│   └── c</span><br><span class="line">└── d</span><br><span class="line">    └── d</span><br><span class="line"></span><br><span class="line">2 directories, 3 files</span><br></pre></td></tr></table></figure>
+
+<p><strong>文件覆盖：mv到已存在的文件中，即是覆盖</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── b</span><br><span class="line">│   ├── b</span><br><span class="line">│   └── c</span><br><span class="line">└── d</span><br><span class="line">    └── d</span><br><span class="line"></span><br><span class="line">2 directories, 3 files</span><br><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ mv b/c b/b     <span class="comment">#用c覆盖b，并销毁c.**</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree</span><br><span class="line">.</span><br><span class="line">├── b</span><br><span class="line">│   └── b</span><br><span class="line">└── d</span><br><span class="line">    └── d</span><br><span class="line"></span><br><span class="line">2 directories, 2 files</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-查看文件内容的命令"><a href="#6-查看文件内容的命令" class="headerlink" title="6.查看文件内容的命令"></a>6.查看文件内容的命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">cat</span><br><span class="line">该命令可以将文件内容显示到终端，由于终端是有缓存的，因此能显示的字节数也是受限制的。 如果文件太大数据就不能完全显示出来了，因此该命令适合查看比较小的文件内容。</span><br><span class="line">$ cat 文件名</span><br><span class="line"></span><br><span class="line">more</span><br><span class="line">该命令比 cat 要高级一点，我们可以以翻屏的方式查看文件中的内容，使用方式如下：</span><br><span class="line">$ more 文件名</span><br><span class="line"><span class="comment"># 快捷键</span></span><br><span class="line">- 回车: 显示下一行</span><br><span class="line">- 空格: 向下滚动一屏</span><br><span class="line">- b: 返回上一屏</span><br><span class="line">- q: 退出more</span><br><span class="line"></span><br><span class="line">less</span><br><span class="line">该命令和 more 命令差不多，我们可以以翻屏的方式查看文件中的内容，使用方式如下：</span><br><span class="line">$ less 文件名</span><br><span class="line"><span class="comment"># 快捷键</span></span><br><span class="line">- b: 向上翻页</span><br><span class="line">- 空格: 向后翻页</span><br><span class="line">- 回车: 显示下一行</span><br><span class="line">- 上下键: 上下滚动</span><br><span class="line">- q:退出</span><br><span class="line"></span><br><span class="line">head</span><br><span class="line">使用该命令可以查看文件头部的若干行信息，使用方式如下:</span><br><span class="line"><span class="comment"># 默认显示文件的前10行</span></span><br><span class="line">$ head 文件名</span><br><span class="line"><span class="comment"># 指定显示头部的前多少行</span></span><br><span class="line">$ head -行数 文件名</span><br><span class="line"></span><br><span class="line">tail</span><br><span class="line"><span class="comment"># 默认显示文件的后10行</span></span><br><span class="line">$ tail 文件名</span><br><span class="line"><span class="comment"># 指定显示尾部的最后多少行</span></span><br><span class="line">$ tail -行数 文件名</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-链接的创建"><a href="#7-链接的创建" class="headerlink" title="7.链接的创建"></a>7.链接的创建</h3><p><strong>软链接的创建  ln -s 源文件路径 软链接名称</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/d$ ln -s d ee**</span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/d$ ls</span><br><span class="line">d  ee</span><br><span class="line"><span class="comment">#注意点：最好使用绝对路径，防止文件移动之后链接失效</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/d$ ls -l</span><br><span class="line">总用量 4</span><br><span class="line">-rw-rw-r-- 1 gao gao 10 6月  19 13:53 d</span><br><span class="line">lrwxrwxrwx 1 gao gao  1 6月  19 14:57 ee -&gt; d  <span class="comment">#此处是相对路径，直接ee指向d，若更改位置，则可能会找不到d文件</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>硬链接的创建 ln 源文件 硬链接的名字</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/d$ ln d ff**</span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/d$ ls -l</span><br><span class="line">总用量 8</span><br><span class="line">-rw-rw-r-- 2 gao gao 10 6月  19 13:53 d</span><br><span class="line">lrwxrwxrwx 1 gao gao  1 6月  19 14:57 ee -&gt; d</span><br><span class="line">-rw-rw-r-- 2 gao gao 10 6月  19 13:53 ff</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-文件属性的设置"><a href="#8-文件属性的设置" class="headerlink" title="8.文件属性的设置"></a>8.文件属性的设置</h3><p><strong>修改文件权限</strong></p>
+<p>文字设定法</p>
+<p>指令形式：chmod who [+|-|=] mod 文件名</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">- who:</span><br><span class="line">	- u: user  -&gt; 文件所有者</span><br><span class="line">	- g: group -&gt; 文件所属组用户</span><br><span class="line">	- o: other -&gt; 其他</span><br><span class="line">	- a: all, 以上是三类人 u+g+o</span><br><span class="line">- 对权限的操作:</span><br><span class="line">	+: 添加权限</span><br><span class="line">	-: 去除权限</span><br><span class="line">	=: 权限的覆盖</span><br><span class="line">- mod: 权限</span><br><span class="line">	r: read, 读</span><br><span class="line">	w: write, 写</span><br><span class="line">	x: execute, 执行</span><br><span class="line">	-: 没有权限</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/b$ ls -l</span><br><span class="line">总用量 4</span><br><span class="line">-rw-rw-r-- 1 gao gao 10 6月  19 13:54 c</span><br><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/b$ chmod a=rwx c**</span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>/b$ ls -l</span><br><span class="line">总用量 4</span><br><span class="line">-rwxrwxrwx 1 gao gao 10 6月  19 13:54 c</span><br></pre></td></tr></table></figure>
+
+<p>数字设定法</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 语法格式: chmod [+|-|=] mod 文件名</span></span><br><span class="line">	- 对权限的操作:</span><br><span class="line">		+: 添加权限</span><br><span class="line">		-: 去除权限</span><br><span class="line">		=: 权限的覆盖, 等号可以不写</span><br><span class="line">	- mod: 权限描述, 所有权限都放开是 7</span><br><span class="line">		- 4: <span class="built_in">read</span>, r</span><br><span class="line">		- 2: write, w</span><br><span class="line">		- 1: execute , x</span><br><span class="line">		- 0: 没有权限</span><br><span class="line">		</span><br><span class="line"><span class="comment"># 分解: chmod 0567 a.txt</span></span><br><span class="line"></span><br><span class="line">    0           5           6             7</span><br><span class="line">  八进制     文件所有者  文件所属组用户    其他人</span><br><span class="line">              r + x       r + w         r+w+x</span><br><span class="line"><span class="comment">#0一般省略</span></span><br><span class="line"></span><br><span class="line"><span class="comment">######################### 举例 #########################</span></span><br><span class="line"><span class="comment"># 查看文件 c.txt 的权限			   </span></span><br><span class="line">robin@OS:~/Linux$ ll c.txt </span><br><span class="line">-rwxrwxrwx 2 robin robin 2929 Apr 14 18:53 c.txt*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 文件所有者去掉执行权限, 所属组用户去掉写权限, 其他人去掉读+写权限</span></span><br><span class="line">robin@OS:~/Linux$ chmod -123 c.txt</span><br><span class="line">robin@OS:~/Linux$ ll c.txt </span><br><span class="line">-rw-r-xr-- 2 robin robin 2929 Apr 14 18:53 c.txt*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 文件所有者添加执行权限, 所属组用户和其他人权限不变</span></span><br><span class="line">robin@OS:~/Linux$ chmod +100 c.txt</span><br><span class="line">robin@OS:~/Linux$ ll c.txt </span><br><span class="line">-rwxr-xr-- 2 robin robin 2929 Apr 14 18:53 c.txt*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将文件所有者,文件所属组用户,其他人权限设置为读+写, 没有执行权限</span></span><br><span class="line">robin@OS:~/Linux$ chmod 666 c.txt</span><br><span class="line">robin@OS:~/Linux$ ll c.txt </span><br><span class="line">-rw-rw-rw- 2 robin robin 2929 Apr 14 18:53 c.txt</span><br></pre></td></tr></table></figure>
+
+<p><strong>修改文件所有者&amp;&amp;修改文件所属组</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#只修改文件所有者</span></span><br><span class="line">sudo chown 新的所有者 文件名</span><br><span class="line"></span><br><span class="line"><span class="comment">#修改所有者和所属组</span></span><br><span class="line">sudo chown 新的所有者:新的组名 文件名</span><br><span class="line"></span><br><span class="line"><span class="comment">#只修改所属组</span></span><br><span class="line">sudo chgrp 新的组 文件名</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-tree-amp-amp-pwd-amp-amp-touch-amp-amp-which命令"><a href="#9-tree-amp-amp-pwd-amp-amp-touch-amp-amp-which命令" class="headerlink" title="9.tree&amp;&amp;pwd&amp;&amp;touch&amp;&amp;which命令"></a>9.tree&amp;&amp;pwd&amp;&amp;touch&amp;&amp;which命令</h3><p><strong>tree直接执行，树形显示当前目录的文件</strong></p>
+<p><strong>tree 目录，树形显示文件夹中的文件</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree**</span><br><span class="line">.</span><br><span class="line">├── b</span><br><span class="line">│   └── c</span><br><span class="line">└── d</span><br><span class="line">    ├── d</span><br><span class="line">    ├── ee -&gt; d</span><br><span class="line">    ├── ff</span><br><span class="line">    └── gg</span><br><span class="line"></span><br><span class="line">2 directories, 5 files</span><br><span class="line"></span><br><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ tree d/**</span><br><span class="line">d/</span><br><span class="line">├── d</span><br><span class="line">├── ee -&gt; d</span><br><span class="line">├── ff</span><br><span class="line">└── gg</span><br><span class="line"></span><br><span class="line">0 directories, 4 files</span><br></pre></td></tr></table></figure>
+
+<p><strong>pwd 得到当前的工作目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ <span class="built_in">pwd</span>**</span><br><span class="line">/home/gao/桌面/<span class="built_in">test</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>which得到所要执行的命令所在的实际路径</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">**gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ <span class="built_in">which</span> ls**</span><br><span class="line">/usr/bin/ls</span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ <span class="built_in">which</span> tree</span><br><span class="line">/usr/bin/tree</span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ <span class="built_in">which</span> <span class="built_in">pwd</span></span><br><span class="line">/usr/bin/<span class="built_in">pwd</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>重定向指令&gt;  &gt;&gt;</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ <span class="built_in">echo</span> hello   <span class="comment">#不用重定向，直接输出到终端</span></span><br><span class="line">hello</span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ <span class="built_in">echo</span> hello &gt; temp <span class="comment">#采用&gt;重定向，输出到新文件</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ cat temp</span><br><span class="line">hello</span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ <span class="built_in">echo</span> world &gt; temp <span class="comment">#采用&gt;重定向，覆盖旧文件</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ cat temp</span><br><span class="line">world</span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ <span class="built_in">echo</span> fine &gt;&gt; temp <span class="comment">#采用&gt;&gt;重定向，追加到到已有文件</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ cat temp</span><br><span class="line">world</span><br><span class="line">fine</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux%E5%9F%BA%E7%A1%80/" rel="tag"># Linux基础</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/06/Linux%E5%9F%BA%E7%A1%80/" rel="prev" title="Linux基础">
+      <i class="fa fa-chevron-left"></i> Linux基础
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux%E5%9F%BA%E7%A1%80-2-linux%E7%9A%84%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">Linux基础(2):linux的文件管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-cd%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">1.cd命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-ls%E5%91%BD%E4%BB%A4"><span class="nav-number">3.</span> <span class="nav-text">2.ls命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-mkdir%E5%88%9B%E5%BB%BA%E7%9B%AE%E5%BD%95-amp-amp-rm%E5%88%A0%E9%99%A4%E7%9B%AE%E5%BD%95"><span class="nav-number">4.</span> <span class="nav-text">3.mkdir创建目录&amp;&amp;rm删除目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-cp%E5%91%BD%E4%BB%A4%E6%8B%B7%E8%B4%9D%E6%96%87%E4%BB%B6"><span class="nav-number">5.</span> <span class="nav-text">4.cp命令拷贝文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-mv%E5%91%BD%E4%BB%A4%E7%A7%BB%E5%8A%A8%EF%BC%88%E6%94%B9%E5%90%8D%EF%BC%89%EF%BC%88%E8%A6%86%E7%9B%96%EF%BC%89%E6%96%87%E4%BB%B6"><span class="nav-number">6.</span> <span class="nav-text">5.mv命令移动（改名）（覆盖）文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%9F%A5%E7%9C%8B%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9%E7%9A%84%E5%91%BD%E4%BB%A4"><span class="nav-number">7.</span> <span class="nav-text">6.查看文件内容的命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E9%93%BE%E6%8E%A5%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">8.</span> <span class="nav-text">7.链接的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-%E6%96%87%E4%BB%B6%E5%B1%9E%E6%80%A7%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-number">9.</span> <span class="nav-text">8.文件属性的设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-tree-amp-amp-pwd-amp-amp-touch-amp-amp-which%E5%91%BD%E4%BB%A4"><span class="nav-number">10.</span> <span class="nav-text">9.tree&amp;&amp;pwd&amp;&amp;touch&amp;&amp;which命令</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="haoyu"
+      src="/images/photo.jpg">
+  <p class="site-author-name" itemprop="name">haoyu</p>
+  <div class="site-description" itemprop="description">清扬似玉须勤学</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">haoyu</span>
+</div>
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_pv">
+  本站访问数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
