@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"gao-haoyu.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Linux基础(6):linux中Vim的使用Vim中的三种模式 编辑模式、命令模式、末行模式Vim中文件的 编辑、 查找、 分屏等操作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux中Vim的使用">
+<meta property="og:url" content="https://gao-haoyu.github.io/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="小高的学习基地">
+<meta property="og:description" content="Linux基础(6):linux中Vim的使用Vim中的三种模式 编辑模式、命令模式、末行模式Vim中文件的 编辑、 查找、 分屏等操作">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/%E6%A8%A1%E5%BC%8F%E8%BD%AC%E6%8D%A2.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/man%E6%96%87%E4%BB%B6.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/%E5%88%86%E5%B1%8F%E6%8C%87%E4%BB%A4.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/%E5%88%86%E5%B1%8F%E6%95%88%E6%9E%9C.png">
+<meta property="article:published_time" content="2021-06-21T09:13:09.000Z">
+<meta property="article:modified_time" content="2021-06-21T09:38:11.322Z">
+<meta property="article:author" content="haoyu">
+<meta property="article:tag" content="Linux基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gao-haoyu.github.io/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/%E6%A8%A1%E5%BC%8F%E8%BD%AC%E6%8D%A2.png">
+
+<link rel="canonical" href="https://gao-haoyu.github.io/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Linux中Vim的使用 | 小高的学习基地</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小高的学习基地</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">高浩宇的学习记录</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://gao-haoyu.github.io/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/photo.jpg">
+      <meta itemprop="name" content="haoyu">
+      <meta itemprop="description" content="清扬似玉须勤学">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小高的学习基地">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux中Vim的使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-06-21 17:13:09 / 修改时间：17:38:11" itemprop="dateCreated datePublished" datetime="2021-06-21T17:13:09+08:00">2021-06-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Linux基础-6-linux中Vim的使用"><a href="#Linux基础-6-linux中Vim的使用" class="headerlink" title="Linux基础(6):linux中Vim的使用"></a>Linux基础(6):linux中Vim的使用</h2><p>Vim中的三种模式 <strong>编辑模式、命令模式、末行模式</strong><br>Vim中文件的 <strong>编辑、 查找、 分屏等操作</strong></p>
+<span id="more"></span>
+<h3 id="安装-amp-基础操作"><a href="#安装-amp-基础操作" class="headerlink" title="安装&amp;基础操作"></a>安装&amp;基础操作</h3><p>安装命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install vim     <span class="comment">#在线安装vim</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面$ vimtutor   <span class="comment">#查看vim自带基础命令操作</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="vim基本操作"><a href="#vim基本操作" class="headerlink" title="vim基本操作"></a>vim基本操作</h3><p>首先明确，vim是有三种模式：编辑模式，命令模式，末行模式。转换关系如下<br><img src="/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/%E6%A8%A1%E5%BC%8F%E8%BD%AC%E6%8D%A2.png" alt="模式转换"></p>
+<p><strong>如何采用指令来操作文档</strong></p>
+<p> 创建&amp;打卡&amp;保存文档</p>
+<p>基本语法</p>
+<p>vim 新的文件名   创建文件</p>
+<p>vim 文件名    打开文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gao@gao-VirtualBox:~/桌面/<span class="built_in">test</span>$ vim new_file.txt</span><br></pre></td></tr></table></figure>
+
+<p>在vim中进入编辑模式，编辑文件。之后保存文件并退出:wq</p>
+<h3 id="命令模式下的常用操作"><a href="#命令模式下的常用操作" class="headerlink" title="命令模式下的常用操作"></a>命令模式下的常用操作</h3><p><strong>保存退出</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crtl键+ ZZ 直接命令模式下保存退出，返回shell</span><br></pre></td></tr></table></figure>
+
+<p><strong>代码对齐</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">依次按下 g=GG实现代码块的对齐</span><br></pre></td></tr></table></figure>
+
+<p><strong>删除命令</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x   删除光标覆盖的字符</span><br><span class="line">dd  删除光标所在的行</span><br><span class="line">ndd 从光标所在行开始删除n行</span><br></pre></td></tr></table></figure>
+
+<p><strong>撤销命令</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">u 撤销</span><br></pre></td></tr></table></figure>
+
+<p><strong>复制命令</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yy  复制光标所在行</span><br><span class="line">nyy 从光标所在行开始复制n行</span><br></pre></td></tr></table></figure>
+
+<p><strong>粘贴命令</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p 粘贴到光标所在行的下边（小写的p）</span><br><span class="line">P 粘贴到光标所在行的上边（大写的P）</span><br></pre></td></tr></table></figure>
+
+<p><strong>可视模式</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">v    进入字符可视化模式</span><br><span class="line">V    进入行可视化的模式</span><br><span class="line">crtl v 进入块可视化模式</span><br></pre></td></tr></table></figure>
+
+<p>在可视模式下，一些命令有所变化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y 复制选中的数据块</span><br><span class="line">d 删除选中的数据块</span><br></pre></td></tr></table></figure>
+
+<p><strong>替换命令</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">r  替换光标后的单个字符</span><br><span class="line">R  替换光标后的多个字符    按esc结束替换</span><br></pre></td></tr></table></figure>
+
+<p><strong>查找命令</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/	                 直接按/后加需要查找的内容</span><br><span class="line">n	从当前位置向下	</span><br><span class="line">N	从当前位置向上	</span><br><span class="line">?	                 直接按?后加需要查找的内容</span><br><span class="line">n	从当前位置向上	</span><br><span class="line">N	从当前位置向下	</span><br><span class="line"></span><br><span class="line">#	                 光标需要先放在被搜索的关键字上，键盘上按 #</span><br><span class="line">n	从当前位置向上	</span><br><span class="line">N	从当前位置向下</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看man文档</strong></p>
+<p><img src="/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/man%E6%96%87%E4%BB%B6.png" alt="man文档"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 打开 man 文档首页</span></span><br><span class="line">$ man man</span><br><span class="line"><span class="comment"># 退出 man 文档，直接按键盘上的 q 即可</span></span><br><span class="line">q</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查询第一章的shell命令</span></span><br><span class="line">$ man 1 cp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查询第二章的系统函数 (如: read, write, open 等)</span></span><br><span class="line">$ man 2 <span class="built_in">read</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查询第三章的标准的库函数 (如: fread, fwrite, fopen 等)</span></span><br><span class="line">$ man 3 fread</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查询第五章的特殊的配置文件说明, 比如: /etc/passwd 或者 /etc/group</span></span><br><span class="line">$ man 5 passwd</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">如果当前是在 vim 的命令模式下，我们可以直接跳转到 man 文档：</span><br><span class="line"></span><br><span class="line">找到要查看的函数，然后将光标放到该函数上</span><br><span class="line">在键盘上依次输入：章节号 (可选) + K(shift+k)(大写的k)，就会自动调整到 man 文档中了</span><br></pre></td></tr></table></figure>
+
+<h3 id="末行模式的常用操作"><a href="#末行模式的常用操作" class="headerlink" title="末行模式的常用操作"></a>末行模式的常用操作</h3><p><strong>命令行与末行模式之间转换</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">命令行到末行模式  直接按：</span><br><span class="line">末行模式到命令行  按两次esc</span><br></pre></td></tr></table></figure>
+
+<p><strong>保存退出</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">q	退出，如果退出的时候文件没有保存，vim 会提示是否要保存</span><br><span class="line">q!	直接退出，不保存 (强制退出)</span><br><span class="line">w	保存，不退出 (相当在 windows 中于按了 ctrl+s)</span><br><span class="line">wq	保存退出</span><br><span class="line">x	保存退出</span><br></pre></td></tr></table></figure>
+
+<p><strong>替换</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">s / 被替换的关键字 / 新的关键字 /g	                只对光标所在行进行替换</span><br><span class="line">行号 1, 行号 2s / 被替换的关键字 / 新的关键字 /g	  [行号1 , 行号2] 是一个从小到大的范围，对这个范围进行替换</span><br><span class="line">% s / 被替换的关键字 / 新的关键字 /g	              % 代表对所有行进行替换</span><br></pre></td></tr></table></figure>
+
+<p><strong>分屏</strong></p>
+<p><img src="/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/%E5%88%86%E5%B1%8F%E6%8C%87%E4%BB%A4.png" alt="分屏指令"></p>
+<p>vsp更为常用，效果显示<br>执行：vsp temp    temp为文件名</p>
+<p><img src="/2021/06/21/Linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8/%E5%88%86%E5%B1%8F%E6%95%88%E6%9E%9C.png" alt="分屏效果"></p>
+<p><strong>行跳转</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:#行号    跳转到相应行</span><br></pre></td></tr></table></figure>
+
+<p><strong>执行shell命令</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:!shell命令   之后回车即可执行该命令</span><br></pre></td></tr></table></figure>
+<h3 id="感谢丙哥-https-subingwen-cn-linux-vim"><a href="#感谢丙哥-https-subingwen-cn-linux-vim" class="headerlink" title="感谢丙哥:https://subingwen.cn/linux/vim/"></a>感谢丙哥:<a target="_blank" rel="noopener" href="https://subingwen.cn/linux/vim/">https://subingwen.cn/linux/vim/</a></h3>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Linux%E5%9F%BA%E7%A1%80/" rel="tag"># Linux基础</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/21/Linux%E6%9F%A5%E6%89%BE%E5%91%BD%E4%BB%A4/" rel="prev" title="Linux查找命令">
+      <i class="fa fa-chevron-left"></i> Linux查找命令
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux%E5%9F%BA%E7%A1%80-6-linux%E4%B8%ADVim%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">Linux基础(6):linux中Vim的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-amp-%E5%9F%BA%E7%A1%80%E6%93%8D%E4%BD%9C"><span class="nav-number">1.1.</span> <span class="nav-text">安装&amp;基础操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#vim%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C"><span class="nav-number">1.2.</span> <span class="nav-text">vim基本操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C"><span class="nav-number">1.3.</span> <span class="nav-text">命令模式下的常用操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AB%E8%A1%8C%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C"><span class="nav-number">1.4.</span> <span class="nav-text">末行模式的常用操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%9F%E8%B0%A2%E4%B8%99%E5%93%A5-https-subingwen-cn-linux-vim"><span class="nav-number">1.5.</span> <span class="nav-text">感谢丙哥:https:&#x2F;&#x2F;subingwen.cn&#x2F;linux&#x2F;vim&#x2F;</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="haoyu"
+      src="/images/photo.jpg">
+  <p class="site-author-name" itemprop="name">haoyu</p>
+  <div class="site-description" itemprop="description">清扬似玉须勤学</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">haoyu</span>
+</div>
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_pv">
+  本站访问数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
