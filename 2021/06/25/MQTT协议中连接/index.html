@@ -23,12 +23,12 @@
   </script>
 
 
-  <meta name="description" content="MQTT协议基础(3):MQTT协议中的连接MQTT协议的基础知识包括CONNECT数据包、CONNACK数据包、DISCONNECT数据包">
+  <meta name="description" content="MQTT协议基础(3):MQTT协议中的连接MQTT协议中连接相关知识包括CONNECT数据包、CONNACK数据包、DISCONNECT数据包等">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MQTT协议中的连接问题">
 <meta property="og:url" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/index.html">
 <meta property="og:site_name" content="小高的学习基地">
-<meta property="og:description" content="MQTT协议基础(3):MQTT协议中的连接MQTT协议的基础知识包括CONNECT数据包、CONNACK数据包、DISCONNECT数据包">
+<meta property="og:description" content="MQTT协议基础(3):MQTT协议中的连接MQTT协议中连接相关知识包括CONNECT数据包、CONNACK数据包、DISCONNECT数据包等">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/1.png">
 <meta property="og:image" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/2.png">
@@ -43,7 +43,7 @@
 <meta property="og:image" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/11.png">
 <meta property="og:image" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/12.png">
 <meta property="article:published_time" content="2021-06-25T13:16:26.000Z">
-<meta property="article:modified_time" content="2021-06-25T13:41:03.316Z">
+<meta property="article:modified_time" content="2021-06-27T02:59:21.840Z">
 <meta property="article:author" content="haoyu">
 <meta property="article:tag" content="MQTT协议基础">
 <meta name="twitter:card" content="summary">
@@ -205,10 +205,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-06-25 21:16:26 / 修改时间：21:41:03" itemprop="dateCreated datePublished" datetime="2021-06-25T21:16:26+08:00">2021-06-25</time>
+              <time title="创建时间：2021-06-25 21:16:26" itemprop="dateCreated datePublished" datetime="2021-06-25T21:16:26+08:00">2021-06-25</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-06-27 10:59:21" itemprop="dateModified" datetime="2021-06-27T10:59:21+08:00">2021-06-27</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -230,141 +236,123 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="MQTT协议基础-3-MQTT协议中的连接"><a href="#MQTT协议基础-3-MQTT协议中的连接" class="headerlink" title="MQTT协议基础(3):MQTT协议中的连接"></a>MQTT协议基础(3):MQTT协议中的连接</h2><p>MQTT协议的基础知识包括<strong>CONNECT数据包、CONNACK数据包、DISCONNECT数据包</strong></p>
+        <h2 id="MQTT协议基础-3-MQTT协议中的连接"><a href="#MQTT协议基础-3-MQTT协议中的连接" class="headerlink" title="MQTT协议基础(3):MQTT协议中的连接"></a>MQTT协议基础(3):MQTT协议中的连接</h2><p>MQTT协议中连接相关知识包括<strong>CONNECT数据包、CONNACK数据包、DISCONNECT数据包等</strong></p>
 <span id="more"></span>
 
 <h3 id="建立连接的过程"><a href="#建立连接的过程" class="headerlink" title="建立连接的过程"></a>建立连接的过程</h3><p><img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/1.png"></p>
 <p>建立连接的过程中，如果允许Client接入，则回复一个CONNACK包，该CONNACK包的返回码为0.</p>
 <p>如果不允许接入，则回复一个返回码不为0的CONNAK包，之后断开底层TCP连接</p>
-<h4 id="CONNECT数据包"><a href="#CONNECT数据包" class="headerlink" title="CONNECT数据包"></a>CONNECT数据包</h4><pre><code>数据包格式
-
-- 固定头
-
-    基本样式
+<h4 id="CONNECT数据包"><a href="#CONNECT数据包" class="headerlink" title="CONNECT数据包"></a>CONNECT数据包</h4><p>数据包格式</p>
+<ul>
+<li><p>固定头</p>
+<p>  基本样式</p>
+<p><img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/2.png"></p>
+<p>  关键信息：CONNECT数据包类型为1.</p>
+</li>
+<li><p>可变头</p>
+<p>  可变头由四部分组成：协议名称，协议版本，连接标识， Keepalive</p>
+<ul>
+<li>协议名称</li>
+</ul>
+<p>  协议名称是一个UTF-8编码字符串，在MQTT协议中会有两个字节的前缀，用于标志字符串的长度。</p>
+<p>  协议名称的值固定为MQTT，加上前缀共有6个字节。</p>
+<p> <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/3.png"></p>
+<ul>
+<li>协议版本</li>
+</ul>
+<p>  长度为1个字节，是一个无符号整数，MQTT3.1.1的版本号为4.</p>
+<p> <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/4.png"></p>
+<ul>
+<li>连接标识长度为1个字节，字节中不同的位用于标识不同的连接选项。</li>
+</ul>
+<p> <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/5.png"></p>
+<p>  各位代表的含义</p>
+<pre><code>      <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">User Name flag</span><br><span class="line">标识消息体中是否可以包含用户名字段。置0，不能包含。置1，必须包含。</span><br><span class="line"></span><br><span class="line">Password Flag</span><br><span class="line">标识消息体中是否可以包含密码字段。置0，不能包含。置1，必须包含。如果用户标志置0.密码也必须置0</span><br><span class="line"></span><br><span class="line">Will Retain</span><br><span class="line">标识遗嘱消息被发布时是否需要保留，置0，不保留。置1，保留。</span><br><span class="line"></span><br><span class="line">Will QoS</span><br><span class="line">标识遗嘱消息的QoS等级</span><br><span class="line"></span><br><span class="line">Will Flag</span><br><span class="line">标识是否使用遗嘱消息，置1，使用遗嘱消息，同时需要保证消息体中包含Will Topic 和 Will Message字段。置0，不使用</span><br><span class="line"></span><br><span class="line">Clean Session</span><br><span class="line">会话清除标识。标识是否建立一个持久化连接（带有状态的保存的连接）。置0，持久化连接。  置1，非持久化连接。</span><br></pre></td></tr></table></figure>
 </code></pre>
-<p>  <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/2.png"></p>
-<pre><code>    关键信息：CONNECT数据包类型为1.
-
-- 可变头
-
-    可变头由四部分组成：协议名称，协议版本，连接标识， Keepalive
-
-    - 协议名称
-
-        协议名称是一个UTF-8编码字符串，在MQTT协议中会有两个字节的前缀，用于标志字符串的长度。
-
-        协议名称的值固定为MQTT，加上前缀共有6个字节。
+<ul>
+<li>Keeplive</li>
+</ul>
+<p> <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/6.png"></p>
+</li>
+</ul>
+<p>以秒为单位，十六位。client和broker之间在这个时间间隔内至少要有一次消息交互，否则会认为两者之间的连接已经断开。</p>
+<ul>
+<li><p>总览</p>
+<p> <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/7.png"></p>
+</li>
+<li><p>消息体</p>
+<p>  消息体包含五个字段：客户端标识符、遗愿主题、遗愿QoS、遗愿消息、用户名、密码。</p>
+<p>  其中客户端标识符是必须的，剩余四个依据可变头中是否指定来确认是否包含相应字段。</p>
+<p>  这些可变字段，有一个两字节的前缀来标识字段的长度。其基本字段形式如下：</p>
+<p> <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/8.png"></p>
+<ul>
+<li>客户端标识应唯一，大多时候可以选择唯一硬件标志等。MQTT协议要求Client连接时必须带上Client Identifier。但是也可以接收标识符为空的CONNECT数据包，这是Broker会为Client分配一个内部唯一的标识符，如果需要持久性连接，必须自己为Client设置一个唯一的标识符。</li>
+<li>用户名&amp;密码&amp;遗愿消息&amp;遗愿主题&amp;遗愿QoS,的消息是在可变头中</li>
+</ul>
+<p>  用户名标志位置1，密码标志位置1，  遗愿标志位置1时，包含这些字段。</p>
+</li>
+</ul>
+<h4 id="CONNACK数据包"><a href="#CONNACK数据包" class="headerlink" title="CONNACK数据包"></a>CONNACK数据包</h4><p>当Broker收到Client的CONNECT数据包后，检查并校验CONNECT数据包的内容，然后回复一个CONNACK的数据包。</p>
+<ul>
+<li><p>固定头</p>
+<p> <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/9.png"></p>
+</li>
+</ul>
+<p>注意的点：报文类型为2，由于消息体为空，剩余长度就是可变头的长度，为固定值2个字节。</p>
+<ul>
+<li><p>可变头</p>
+<p> <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/10.png"></p>
+</li>
+</ul>
+<p>可变头中分为两个大类：连接确认标志&amp;连接返回码</p>
+<ul>
+<li><p>连接确认标志</p>
+<p>  这个字节高七位均为保留位，置0.  第0位是会话存在标识位。这个位的设置遵循如下规则</p>
+<pre><code>      <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">如果服务端收到清理会话（CleanSession）标志为1的连接</span><br><span class="line">除了将CONNACK报文中的返回码设置为0之外，还必须将CONNACK报文中的当前会话设置（Session Present）标志为0 </span><br><span class="line"> </span><br><span class="line">如果服务端收到一个CleanSession为0的连接</span><br><span class="line">当前会话标志的值取决于服务端是否已经保存了ClientId对应客户端的会话状态。</span><br><span class="line">如果服务端已经保存了会话状态，它必须将CONNACK报文中的当前会话标志设置为1。</span><br><span class="line">如果服务端没有已保存的会话状态，它必须将 CONNACK报文中的当前会话设置为0。还需要将CONNACK报文中的返回码设置为0</span><br><span class="line"></span><br><span class="line">另外返回码设置为0，意味着连接成功情况。当连接不成功时，返回码不为0的情况时。</span><br><span class="line">它必须将 CONNACK报文中的当前会话设置为0</span><br></pre></td></tr></table></figure>
 </code></pre>
-<p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/3.png"></p>
-<pre><code>    - 协议版本
-
-        长度为1个字节，是一个无符号整数，MQTT3.1.1的版本号为4.
-</code></pre>
-<p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/4.png"></p>
-<pre><code>    - 连接标识长度为1个字节，字节中不同的位用于标识不同的连接选项。
-</code></pre>
-<p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/5.png"></p>
-<pre><code>        各位代表的含义
-
-        <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">User Name flag</span><br><span class="line">标识消息体中是否可以包含用户名字段。置0，不能包含。置1，必须包含。</span><br><span class="line"></span><br><span class="line">Password Flag</span><br><span class="line">标识消息体中是否可以包含密码字段。置0，不能包含。置1，必须包含。如果用户标志置0.密码也必须置0</span><br><span class="line"></span><br><span class="line">Will Retain</span><br><span class="line">标识遗嘱消息被发布时是否需要保留，置0，不保留。置1，保留。</span><br><span class="line"></span><br><span class="line">Will QoS</span><br><span class="line">标识遗嘱消息的QoS等级</span><br><span class="line"></span><br><span class="line">Will Flag</span><br><span class="line">标识是否使用遗嘱消息，置1，使用遗嘱消息，同时需要保证消息体中包含Will Topic 和 Will Message字段。置0，不使用</span><br><span class="line"></span><br><span class="line">Clean Session</span><br><span class="line">会话清除标识。标识是否建立一个持久化连接（带有状态的保存的连接）。置0，持久化连接。  置1，非持久化连接。</span><br></pre></td></tr></table></figure>
-
-    - Keeplive
-</code></pre>
-<p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/6.png"></p>
-<pre><code>        以秒为单位，十六位。client和broker之间在这个时间间隔内至少要有一次消息交互，否则会认为两者之间的连接已经断开。
-
-    - 总览
-</code></pre>
-<p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/7.png"></p>
-<pre><code>- 消息体
-
-    消息体包含五个字段：客户端标识符、遗愿主题、遗愿QoS、遗愿消息、用户名、密码。
-
-    其中客户端标识符是必须的，剩余四个依据可变头中是否指定来确认是否包含相应字段。
-
-    这些可变字段，有一个两字节的前缀来标识字段的长度。其基本字段形式如下：
-</code></pre>
-<p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/8.png"></p>
-<pre><code>    - 客户端标识应唯一，大多时候可以选择唯一硬件标志等。MQTT协议要求Client连接时必须带上Client Identifier。但是也可以接收标识符为空的CONNECT数据包，这是Broker会为Client分配一个内部唯一的标识符，如果需要持久性连接，必须自己为Client设置一个唯一的标识符。
-    - 用户名&amp;                     密码          &amp;遗愿消息&amp;遗愿主题&amp;遗愿QoS,的消息是在可变头中
-
-        用户名标志位置1，密码标志位置1，  遗愿标志位置1时，包含这些字段。
-</code></pre>
-<h4 id="CONNACK数据包"><a href="#CONNACK数据包" class="headerlink" title="CONNACK数据包"></a>CONNACK数据包</h4><pre><code>当Broker收到Client的CONNECT数据包后，检查并校验CONNECT数据包的内容，然后回复一个CONNACK的数据包。
-
-- 固定头
-</code></pre>
-<p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/9.png"></p>
-<pre><code>    注意的点：报文类型为2，由于消息体为空，剩余长度就是可变头的长度，为固定值2个字节。
-
-- 可变头
-</code></pre>
-<p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/10.png"></p>
-<pre><code>    可变头中分为两个大类：连接确认标志&amp;连接返回码
-
-    - 连接确认标志
-
-        这个字节高七位均为保留位，置0.  第0位是会话存在标识位。这个位的设置遵循如下规则
-
-        <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">如果服务端收到清理会话（CleanSession）标志为1的连接</span><br><span class="line">除了将CONNACK报文中的返回码设置为0之外，还必须将CONNACK报文中的当前会话设置（Session Present）标志为0 </span><br><span class="line"> </span><br><span class="line">如果服务端收到一个CleanSession为0的连接</span><br><span class="line">当前会话标志的值取决于服务端是否已经保存了ClientId对应客户端的会话状态。</span><br><span class="line">如果服务端已经保存了会话状态，它必须将CONNACK报文中的当前会话标志设置为1。</span><br><span class="line">如果服务端没有已保存的会话状态，它必须将 CONNACK报文中的当前会话设置为0。还需要将CONNACK报文中的返回码设置为0</span><br><span class="line"></span><br><span class="line">另外返回码设置为0，意味着连接成功情况。当连接不成功时，返回码不为0的情况时。</span><br><span class="line">它必须将 CONNACK报文中的当前会话设置为0</span><br></pre></td></tr></table></figure>
-
-    - 连接返回码
-
-        具有如下几种情况
-</code></pre>
+</li>
+<li><p>连接返回码</p>
+</li>
+</ul>
+<p>具有如下几种情况</p>
 <p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/11.png"></p>
-<h3 id="关闭连接"><a href="#关闭连接" class="headerlink" title="关闭连接"></a>关闭连接</h3><pre><code>两种情况：Client主动关闭&amp;&amp;Broker主动关闭。
-
-- Client主动关闭
-
-    Client需要主动发送一个DISCONNECT数据包。该数据包只有固定头，没有可变头和消息体。
-
-    固定头格式如下
-</code></pre>
-<p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/12.png"></p>
-<pre><code>    发布该数据包之后，主动断开底层tcp连接，不必等待Broker的回复。
-
-    发送这个数据包的目的是什么？
-
-    因为Broker需要判断Client是否是正常的断开连接，当Broker收到此数据包的时候，会认为是Client正常断开的，它会丢弃当前连接指定的遗愿消息。如果检测到tcp连接断开，但没有收到此数据包，那么就会向遗愿主题发布遗愿消息
-
-- Broker主动关闭连接
-
-    MQTT协议规定Broker在没有收到DISCONNECT数据包之前都应该保持连接，只有Broker在Keeplive时间间隔里没有收到Client的任何MQTT协议数据包才会主动关闭连接。
-
-    Broker关闭连接不需要发送任何数据包，直接断开底层TCP连接.
-</code></pre>
+<h3 id="关闭连接"><a href="#关闭连接" class="headerlink" title="关闭连接"></a>关闭连接</h3><p>两种情况：Client主动关闭&amp;&amp;Broker主动关闭。</p>
+<ul>
+<li><p>Client主动关闭</p>
+<p>  Client需要主动发送一个DISCONNECT数据包。该数据包只有固定头，没有可变头和消息体。</p>
+<p>  固定头格式如下</p>
+<p> <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/12.png"></p>
+<p>  发布该数据包之后，主动断开底层tcp连接，不必等待Broker的回复。</p>
+<p>  发送这个数据包的目的是什么？</p>
+<p>  因为Broker需要判断Client是否是正常的断开连接，当Broker收到此数据包的时候，会认为是Client正常断开的，它会丢弃当前连接指定的遗愿消息。如果检测到tcp连接断开，但没有收到此数据包，那么就会向遗愿主题发布遗愿消息</p>
+</li>
+<li><p>Broker主动关闭连接</p>
+<p>  MQTT协议规定Broker在没有收到DISCONNECT数据包之前都应该保持连接，只有Broker在Keeplive时间间隔里没有收到Client的任何MQTT协议数据包才会主动关闭连接。</p>
+<p>  Broker关闭连接不需要发送任何数据包，直接断开底层TCP连接.</p>
+</li>
+</ul>
 <h3 id="相关代码分析"><a href="#相关代码分析" class="headerlink" title="相关代码分析"></a>相关代码分析</h3><p>   代码分析，参考书中的node.js下代码。</p>
 <pre><code>    <figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//引入mqtt库</span></span><br><span class="line"><span class="keyword">var</span> mqtt= <span class="built_in">require</span>(<span class="string">&#x27;mqtt&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">//建立连接</span></span><br><span class="line"><span class="keyword">var</span> client= mqtt.connect(<span class="string">&#x27;mqtt://mqtt.eclipse.org&#x27;</span>, &#123;</span><br><span class="line"><span class="attr">clientId</span>:<span class="string">&quot;mqtt_client_id&quot;</span>,</span><br><span class="line"><span class="attr">clean</span>:<span class="literal">false</span></span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">//捕获返回码&amp;当前会话标志</span></span><br><span class="line">client.on(<span class="string">&#x27;connect&#x27;</span>, <span class="function"><span class="keyword">function</span> (<span class="params">connack</span>)</span>&#123;</span><br><span class="line">	<span class="built_in">console</span>.log(<span class="string">&#x27;return code: $&#123;connack.returnCode&#125;, sessionPresent: $&#123;connack.sessionPresent&#125;&#x27;</span>)</span><br><span class="line">client.end</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-    当第一次运行时，返回
-
-    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> code: <span class="number">0</span>, sessionPresent: <span class="literal">false</span></span><br><span class="line"><span class="comment">//因为是第一次建立连接，所以false</span></span><br></pre></td></tr></table></figure>
-
-    再次运行，返回
-
-    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> code: <span class="number">0</span>, sessionPresent: <span class="literal">true</span></span><br><span class="line"><span class="comment">//已经存有状态</span></span><br></pre></td></tr></table></figure>
-
-    通过查阅c++的mqtt.h头文件。发现类似函数如下：
-
-    client的class 具有三种connect成员函数
-
-    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//构造函数声明</span></span><br><span class="line"><span class="built_in">Client</span>(Network&amp; network, <span class="keyword">unsigned</span> <span class="keyword">int</span> command_timeout_ms = <span class="number">30000</span>);	</span><br><span class="line">        	</span><br><span class="line"><span class="comment">/** MQTT Connect - send an MQTT connect packet down the network and wait for a Connack</span></span><br><span class="line"><span class="comment">   *  The nework object must be connected to the network endpoint before calling this</span></span><br><span class="line"><span class="comment">   *  Default connect options are used</span></span><br><span class="line"><span class="comment">   *  @return success code -</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">connect</span><span class="params">()</span></span>;</span><br><span class="line">         </span><br><span class="line">  <span class="comment">/** MQTT Connect - send an MQTT connect packet down the network and wait for a Connack</span></span><br><span class="line"><span class="comment">   *  The nework object must be connected to the network endpoint before calling this</span></span><br><span class="line"><span class="comment">   *  @param options - connect options</span></span><br><span class="line"><span class="comment">   *  @return success code -</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">connect</span><span class="params">(MQTTPacket_connectData&amp; options)</span></span>;</span><br><span class="line">         </span><br><span class="line">  <span class="comment">/** MQTT Connect - send an MQTT connect packet down the network and wait for a Connack</span></span><br><span class="line"><span class="comment">   *  The nework object must be connected to the network endpoint before calling this</span></span><br><span class="line"><span class="comment">   *  @param options - connect options</span></span><br><span class="line"><span class="comment">   *  @param connackData - connack data to be returned</span></span><br><span class="line"><span class="comment">   *  @return success code -</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">connect</span><span class="params">(MQTTPacket_connectData&amp; options, connackData&amp; data)</span></span>;</span><br></pre></td></tr></table></figure>
-
-    可以看到第三种connect函数返回connack信息。再查询connack数据格式&amp;MQTTPacket_connectData数据格式。
-
-    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">connackData</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">int</span> rc;</span><br><span class="line">    <span class="keyword">bool</span> sessionPresent;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">MQTTPacket_connectData未找到定义，先略过。</span><br></pre></td></tr></table></figure>
-
-    根据上面的信息可以仿写c++代码进行client的连接
-
-    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//引入库</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;mqtt.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//建立连接</span></span><br><span class="line">Client c;</span><br><span class="line">MQTTPacket_connectData data;</span><br><span class="line">connackData conack;</span><br><span class="line">c.<span class="built_in">conect</span>(data, conack);</span><br><span class="line"></span><br><span class="line"><span class="comment">//查看返回状态</span></span><br><span class="line">cout&lt;&lt;conack.rc&lt;&lt;end;    <span class="comment">//返回码</span></span><br><span class="line">cout&lt;&lt;conack.sessionPresent&lt;&lt;endl;  <span class="comment">//当前会话标识</span></span><br></pre></td></tr></table></figure>
 </code></pre>
-<h3 id="一点实际技巧："><a href="#一点实际技巧：" class="headerlink" title="一点实际技巧："></a>一点实际技巧：</h3><pre><code>    在进行连接时，若两个设备碰巧申请了同一个客户端标识符。当这两个客户端同时去连接时，会造成什么样的事故呢？
-
-    在MQTT协议中，若两个Client使用相同的Client Identifier进行连接时，如果第二个连接成功，Broker会关闭与第一个Client的连接。
-
-    由于我们使用的MQTT库实现了断线重连功能，所以下线设备会尝试重新连接，结果就是这两个Client交替将对方顶下线，在实际使用中，若检测到某一个Client不停的上线下线，就有可能是这种原因造成的。
+<p>当第一次运行时，返回</p>
+<pre><code>    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> code: <span class="number">0</span>, sessionPresent: <span class="literal">false</span></span><br><span class="line"><span class="comment">//因为是第一次建立连接，所以false</span></span><br></pre></td></tr></table></figure>
 </code></pre>
+<p>再次运行，返回</p>
+<pre><code>    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> code: <span class="number">0</span>, sessionPresent: <span class="literal">true</span></span><br><span class="line"><span class="comment">//已经存有状态</span></span><br></pre></td></tr></table></figure>
+</code></pre>
+<p>通过查阅c++的mqtt.h头文件。发现类似函数如下：</p>
+<p>client的class 具有三种connect成员函数</p>
+<pre><code>    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//构造函数声明</span></span><br><span class="line"><span class="built_in">Client</span>(Network&amp; network, <span class="keyword">unsigned</span> <span class="keyword">int</span> command_timeout_ms = <span class="number">30000</span>);	</span><br><span class="line">        	</span><br><span class="line"><span class="comment">/** MQTT Connect - send an MQTT connect packet down the network and wait for a Connack</span></span><br><span class="line"><span class="comment">   *  The nework object must be connected to the network endpoint before calling this</span></span><br><span class="line"><span class="comment">   *  Default connect options are used</span></span><br><span class="line"><span class="comment">   *  @return success code -</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">connect</span><span class="params">()</span></span>;</span><br><span class="line">         </span><br><span class="line">  <span class="comment">/** MQTT Connect - send an MQTT connect packet down the network and wait for a Connack</span></span><br><span class="line"><span class="comment">   *  The nework object must be connected to the network endpoint before calling this</span></span><br><span class="line"><span class="comment">   *  @param options - connect options</span></span><br><span class="line"><span class="comment">   *  @return success code -</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">connect</span><span class="params">(MQTTPacket_connectData&amp; options)</span></span>;</span><br><span class="line">         </span><br><span class="line">  <span class="comment">/** MQTT Connect - send an MQTT connect packet down the network and wait for a Connack</span></span><br><span class="line"><span class="comment">   *  The nework object must be connected to the network endpoint before calling this</span></span><br><span class="line"><span class="comment">   *  @param options - connect options</span></span><br><span class="line"><span class="comment">   *  @param connackData - connack data to be returned</span></span><br><span class="line"><span class="comment">   *  @return success code -</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">int</span> <span class="title">connect</span><span class="params">(MQTTPacket_connectData&amp; options, connackData&amp; data)</span></span>;</span><br></pre></td></tr></table></figure>
+</code></pre>
+<p>可以看到第三种connect函数返回connack信息。再查询connack数据格式&amp;MQTTPacket_connectData数据格式。</p>
+<pre><code>    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">connackData</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="keyword">int</span> rc;</span><br><span class="line">    <span class="keyword">bool</span> sessionPresent;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">MQTTPacket_connectData未找到定义，先略过。</span><br></pre></td></tr></table></figure>
+</code></pre>
+<p> 根据上面的信息可以仿写c++代码进行client的连接</p>
+<pre><code>    <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//引入库</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;mqtt.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//建立连接</span></span><br><span class="line">Client c;</span><br><span class="line">MQTTPacket_connectData data;</span><br><span class="line">connackData conack;</span><br><span class="line">c.<span class="built_in">conect</span>(data, conack);</span><br><span class="line"></span><br><span class="line"><span class="comment">//查看返回状态</span></span><br><span class="line">cout&lt;&lt;conack.rc&lt;&lt;end;    <span class="comment">//返回码</span></span><br><span class="line">cout&lt;&lt;conack.sessionPresent&lt;&lt;endl;  <span class="comment">//当前会话标识</span></span><br></pre></td></tr></table></figure>
+</code></pre>
+<h3 id="一点实际技巧："><a href="#一点实际技巧：" class="headerlink" title="一点实际技巧："></a>一点实际技巧：</h3><p>在进行连接时，若两个设备碰巧申请了同一个客户端标识符。当这两个客户端同时去连接时，会造成什么样的事故呢？</p>
+<p>在MQTT协议中，若两个Client使用相同的Client Identifier进行连接时，如果第二个连接成功，Broker会关闭与第一个Client的连接。</p>
+<p>由于我们使用的MQTT库实现了断线重连功能，所以下线设备会尝试重新连接，结果就是这两个Client交替将对方顶下线，在实际使用中，若检测到某一个Client不停的上线下线，就有可能是这种原因造成的。</p>
 
     </div>
 
@@ -386,7 +374,10 @@
     <a href="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/" rel="prev" title="MQTT协议的QoS等级">
       <i class="fa fa-chevron-left"></i> MQTT协议的QoS等级
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2021/06/27/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E5%8F%91%E5%B8%83/" rel="next" title="MQTT协议中发布">
+      MQTT协议中发布 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -461,7 +452,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-count">19</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
