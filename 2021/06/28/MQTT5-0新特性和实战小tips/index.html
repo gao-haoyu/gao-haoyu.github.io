@@ -23,25 +23,22 @@
   </script>
 
 
-  <meta name="description" content="MQTT协议基础(2):MQTT协议的QoS等级MQTT协议的QoS等级知识包括三种等级、QoS0、QoS1、QoS2三种等级下的通信过程">
+  <meta name="description" content="MQTT协议基础(7):MQTT5.0部分新特性&amp;实战小技巧MQTT5.0部分新特性&amp;实战小技巧包括共享主题、双向DISCONNECT、如何传输大文件、消息去重等">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MQTT协议的QoS等级">
-<meta property="og:url" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/index.html">
+<meta property="og:title" content="MQTT5.0新特性和实战小tips">
+<meta property="og:url" content="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/index.html">
 <meta property="og:site_name" content="小高的学习基地">
-<meta property="og:description" content="MQTT协议基础(2):MQTT协议的QoS等级MQTT协议的QoS等级知识包括三种等级、QoS0、QoS1、QoS2三种等级下的通信过程">
+<meta property="og:description" content="MQTT协议基础(7):MQTT5.0部分新特性&amp;实战小技巧MQTT5.0部分新特性&amp;实战小技巧包括共享主题、双向DISCONNECT、如何传输大文件、消息去重等">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/0.png">
-<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/1.png">
-<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/2.png">
-<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90.png">
-<meta property="article:published_time" content="2021-06-25T13:15:59.000Z">
-<meta property="article:modified_time" content="2021-06-25T13:23:30.983Z">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/Reason_code.png">
+<meta property="article:published_time" content="2021-06-28T02:51:00.000Z">
+<meta property="article:modified_time" content="2021-06-28T03:03:46.219Z">
 <meta property="article:author" content="haoyu">
 <meta property="article:tag" content="MQTT协议基础">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/0.png">
+<meta name="twitter:image" content="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/Reason_code.png">
 
-<link rel="canonical" href="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/">
+<link rel="canonical" href="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/">
 
 
 <script id="page-configurations">
@@ -54,7 +51,7 @@
   };
 </script>
 
-  <title>MQTT协议的QoS等级 | 小高的学习基地</title>
+  <title>MQTT5.0新特性和实战小tips | 小高的学习基地</title>
   
 
 
@@ -175,7 +172,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://gao-haoyu.github.io/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/">
+    <link itemprop="mainEntityOfPage" href="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/photo.jpg">
@@ -188,7 +185,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          MQTT协议的QoS等级
+          MQTT5.0新特性和实战小tips
         </h1>
 
         <div class="post-meta">
@@ -199,7 +196,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-06-25 21:15:59 / 修改时间：21:23:30" itemprop="dateCreated datePublished" datetime="2021-06-25T21:15:59+08:00">2021-06-25</time>
+              <time title="创建时间：2021-06-28 10:51:00 / 修改时间：11:03:46" itemprop="dateCreated datePublished" datetime="2021-06-28T10:51:00+08:00">2021-06-28</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -222,36 +219,26 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="MQTT协议基础-2-MQTT协议的QoS等级"><a href="#MQTT协议基础-2-MQTT协议的QoS等级" class="headerlink" title="MQTT协议基础(2):MQTT协议的QoS等级"></a>MQTT协议基础(2):MQTT协议的QoS等级</h2><p>MQTT协议的QoS等级知识包括<strong>三种等级、QoS0、QoS1、QoS2</strong><br><strong>三种等级下的通信过程</strong></p>
+        <h2 id="MQTT协议基础-7-MQTT5-0部分新特性-amp-实战小技巧"><a href="#MQTT协议基础-7-MQTT5-0部分新特性-amp-实战小技巧" class="headerlink" title="MQTT协议基础(7):MQTT5.0部分新特性&amp;实战小技巧"></a>MQTT协议基础(7):MQTT5.0部分新特性&amp;实战小技巧</h2><p>MQTT5.0部分新特性&amp;实战小技巧包括<strong>共享主题、双向DISCONNECT、如何传输大文件、消息去重等</strong></p>
 <span id="more"></span>
-<p>在讲解具体控制报文之前，先介绍QoS(Quality of Service)这个概念。所谓的QoS等级，是适用不同场景下，可以提供不同的服务质量等级。</p>
-<h3 id="MQTT提供的QoS"><a href="#MQTT提供的QoS" class="headerlink" title="MQTT提供的QoS"></a>MQTT提供的QoS</h3><ul>
-<li><p>QoS0：至多一次</p>
-<p>  发送者尽力向接收者发送消息，如果发送失败，则放弃。</p>
-</li>
-<li><p>QoS1：至少一次</p>
-<p>  发送者向接收者发送消息，如果发送失败，发送者继续重试，直到接收者收到消息，但是因为重传的原因，接收者可能会收到重复的消息。</p>
-</li>
-<li><p>QoS2：确保只有一次</p>
-<p>  发送者向接收者发送消息，如果发送失败，发送者继续重试，直到接收者收到消息，同时还需要保证，接收者不会因为消息重传而收到重复的消息。</p>
-</li>
+<h3 id="MQTT5-0新特性"><a href="#MQTT5-0新特性" class="headerlink" title="MQTT5.0新特性"></a>MQTT5.0新特性</h3><ul>
+<li>用户属性(User Properties)<br>  新特性中可以在CONNECT PUBLISH和带有Return Code的数据包中携带一个或多个用户属性数据,这样的可以得知发送方的信息，便于答复。    对于需要得知发布者信息的场景比较适用</li>
+<li>共享订阅(Shared Subscriptions)<br>  多个Client共同订阅一个共享主题，那么这个共享主题的消息就会依次均衡地发布给这些Client，实现订阅者地负载均衡。    适用于发布者对同一主题频繁上传数据量较大的数据包</li>
+<li>消息过期(Publication Expiry Interval)<br>  3.1.1版本中通常是在消息体中携带一个时间来指明，消息过期的时间。这个要求，服务器和客户端时间一致，但某些设备，一旦断电后再重启时间会变得不准确，导致异常。5.0中直接包含消息过期功能，发布时直接指定多久之后过期，避免上述问题。<br>适用于客户端有断电、断网等不稳定情形。</li>
+<li>重复主题<br>  3.1.1中连续发布相同主题的消息时，每次都要带上相应的主题消息。 5.0中如果PUBLISH中主题长度置为0，默认使用上一次发布时采用的主题<br>  适用于连续发布同主题消息</li>
+<li>Broker能力查询<br>  5.0协议中，CONNACK数据包中包含了一些预定义的头部文件，用于标记支持哪些MQTT协议功能。如：是否支持Retained消息，是否支持共享订阅，可以支持的最大QoS，可发送最大消息长度，支持的最大Keepalive值，是否支持共享订阅。    </li>
+<li>双向DISCONNECT<br>  5.0中Broke在主动断开连接时也会发送DISCONNECT数据包，同时从Client到Broker，以及Broker到Client的CONNECT都会包含一个Reason Code</li>
 </ul>
-<h3 id="不同QoS等级传输模型"><a href="#不同QoS等级传输模型" class="headerlink" title="不同QoS等级传输模型"></a>不同QoS等级传输模型</h3><ul>
-<li><p>QoS0等级</p>
-<p>  <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/0.png" alt="QoS0等级"></p>
-</li>
-<li><p>QoS1等级</p>
-<p>  <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/1.png" alt="QoS1等级"></p>
-</li>
-<li><p>QoS2等级</p>
-<p>  <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/2.png" alt="QoS2等级"></p>
-<p>  为何QoS2可以保证消息不重复？</p>
-  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">先说QoS2的整体工作流程如下</span><br><span class="line">1.给要发送的新应用消息分配一个未使用的报文标识符。</span><br><span class="line">2.发送的PUBLISH报文必须包含报文标识符且报文的QoS等于2,DUP等于0。</span><br><span class="line">3.将这个PUBLISH报文看作是未确认的,直到从接收者那收到对应的PUBREC报文。</span><br><span class="line">4.收到PUBREC报文后必须发送一个PUBREL报文。PUBREL报文必须包含与原始PUBLISH报文相同的报文标识符。</span><br><span class="line">5.将这个PUBREL报文看作是未确认的，直到从接收者那收到对应的PUBCOMP报文。</span><br></pre></td></tr></table></figure>
-
-<p>  在保证不重复时，采用了这样的规则：一旦发送了对应的PUBREL报文就不能重发这个PUBLISH报文。</p>
-</li>
+<p>关于Reason Code其中包含多种返回值，代表具体的断开连接的原因。具体参数表如下<br><img src="/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/Reason_code.png" alt="Reason Code"></p>
+<h3 id="MQTT实战tips"><a href="#MQTT实战tips" class="headerlink" title="MQTT实战tips"></a>MQTT实战tips</h3><h4 id="如何传输大文件"><a href="#如何传输大文件" class="headerlink" title="如何传输大文件"></a>如何传输大文件</h4><p>基本思路：将大文件先上传到第三方云端，之后传输文件的url。</p>
+<p>优点</p>
+<ul>
+<li>即可以简化发送的数据包</li>
+<li>又可以减少Broker缓存的内存压力</li>
+<li>同时第三方云端通常具有更快的下载速度</li>
+<li>用户也可以根据需要判断是否需要下载。</li>
 </ul>
-<h3 id="更深一步的剖析QoS2协议下发布消息的过程。"><a href="#更深一步的剖析QoS2协议下发布消息的过程。" class="headerlink" title="更深一步的剖析QoS2协议下发布消息的过程。"></a>更深一步的剖析QoS2协议下发布消息的过程。</h3><p>   <img src="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7/%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90.png" alt="深度剖析"></p>
+<h4 id="如何消息去重"><a href="#如何消息去重" class="headerlink" title="如何消息去重"></a>如何消息去重</h4><p>基本思路：在消息体内部设置消息ID，当收到重复ID时，直接丢弃。</p>
 
     </div>
 
@@ -270,13 +257,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2021/06/24/%E5%B0%8F%E6%83%85%E4%B9%A6/" rel="prev" title="小情书">
-      <i class="fa fa-chevron-left"></i> 小情书
+    <a href="/2021/06/27/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E9%83%A8%E5%88%86%E7%89%B9%E6%AE%8A%E8%AE%BE%E7%BD%AE/" rel="prev" title="MQTT协议中部分特殊设置">
+      <i class="fa fa-chevron-left"></i> MQTT协议中部分特殊设置
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2021/06/25/MQTT%E5%8D%8F%E8%AE%AE%E4%B8%AD%E8%BF%9E%E6%8E%A5/" rel="next" title="MQTT协议中连接">
-      MQTT协议中连接 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -335,7 +319,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MQTT%E5%8D%8F%E8%AE%AE%E5%9F%BA%E7%A1%80-2-MQTT%E5%8D%8F%E8%AE%AE%E7%9A%84QoS%E7%AD%89%E7%BA%A7"><span class="nav-number">1.</span> <span class="nav-text">MQTT协议基础(2):MQTT协议的QoS等级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MQTT%E6%8F%90%E4%BE%9B%E7%9A%84QoS"><span class="nav-number">1.1.</span> <span class="nav-text">MQTT提供的QoS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8CQoS%E7%AD%89%E7%BA%A7%E4%BC%A0%E8%BE%93%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">不同QoS等级传输模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%B7%B1%E4%B8%80%E6%AD%A5%E7%9A%84%E5%89%96%E6%9E%90QoS2%E5%8D%8F%E8%AE%AE%E4%B8%8B%E5%8F%91%E5%B8%83%E6%B6%88%E6%81%AF%E7%9A%84%E8%BF%87%E7%A8%8B%E3%80%82"><span class="nav-number">1.3.</span> <span class="nav-text">更深一步的剖析QoS2协议下发布消息的过程。</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MQTT%E5%8D%8F%E8%AE%AE%E5%9F%BA%E7%A1%80-7-MQTT5-0%E9%83%A8%E5%88%86%E6%96%B0%E7%89%B9%E6%80%A7-amp-%E5%AE%9E%E6%88%98%E5%B0%8F%E6%8A%80%E5%B7%A7"><span class="nav-number">1.</span> <span class="nav-text">MQTT协议基础(7):MQTT5.0部分新特性&amp;实战小技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.1.</span> <span class="nav-text">MQTT5.0新特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MQTT%E5%AE%9E%E6%88%98tips"><span class="nav-number">1.2.</span> <span class="nav-text">MQTT实战tips</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BC%A0%E8%BE%93%E5%A4%A7%E6%96%87%E4%BB%B6"><span class="nav-number">1.2.1.</span> <span class="nav-text">如何传输大文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%B6%88%E6%81%AF%E5%8E%BB%E9%87%8D"><span class="nav-number">1.2.2.</span> <span class="nav-text">如何消息去重</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
