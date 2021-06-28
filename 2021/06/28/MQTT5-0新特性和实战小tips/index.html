@@ -30,14 +30,14 @@
 <meta property="og:site_name" content="小高的学习基地">
 <meta property="og:description" content="MQTT协议基础(7):MQTT5.0部分新特性&amp;实战小技巧MQTT5.0部分新特性&amp;实战小技巧包括共享主题、双向DISCONNECT、如何传输大文件、消息去重等MQTT学习的总结思维导图">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/Reason_code.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/reason_code.png">
 <meta property="og:image" content="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/1.png">
 <meta property="article:published_time" content="2021-06-28T02:51:00.000Z">
-<meta property="article:modified_time" content="2021-06-28T06:17:16.201Z">
+<meta property="article:modified_time" content="2021-06-28T06:26:13.939Z">
 <meta property="article:author" content="haoyu">
 <meta property="article:tag" content="MQTT协议基础">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/Reason_code.png">
+<meta name="twitter:image" content="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/reason_code.png">
 
 <link rel="canonical" href="https://gao-haoyu.github.io/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/">
 
@@ -197,7 +197,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-06-28 10:51:00 / 修改时间：14:17:16" itemprop="dateCreated datePublished" datetime="2021-06-28T10:51:00+08:00">2021-06-28</time>
+              <time title="创建时间：2021-06-28 10:51:00 / 修改时间：14:26:13" itemprop="dateCreated datePublished" datetime="2021-06-28T10:51:00+08:00">2021-06-28</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -230,7 +230,7 @@
 <li>Broker能力查询<br>  5.0协议中，CONNACK数据包中包含了一些预定义的头部文件，用于标记支持哪些MQTT协议功能。如：是否支持Retained消息，是否支持共享订阅，可以支持的最大QoS，可发送最大消息长度，支持的最大Keepalive值，是否支持共享订阅。    </li>
 <li>双向DISCONNECT<br>  5.0中Broke在主动断开连接时也会发送DISCONNECT数据包，同时从Client到Broker，以及Broker到Client的CONNECT都会包含一个Reason Code</li>
 </ul>
-<p>关于Reason Code其中包含多种返回值，代表具体的断开连接的原因。具体参数表如下<br><img src="/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/Reason_code.png" alt="Reason Code"></p>
+<p>关于Reason Code其中包含多种返回值，代表具体的断开连接的原因。具体参数表如下<br><img src="/2021/06/28/MQTT5-0%E6%96%B0%E7%89%B9%E6%80%A7%E5%92%8C%E5%AE%9E%E6%88%98%E5%B0%8Ftips/reason_code.png" alt="Reason Code"></p>
 <h3 id="MQTT实战tips"><a href="#MQTT实战tips" class="headerlink" title="MQTT实战tips"></a>MQTT实战tips</h3><h4 id="如何传输大文件"><a href="#如何传输大文件" class="headerlink" title="如何传输大文件"></a>如何传输大文件</h4><p>基本思路：将大文件先上传到第三方云端，之后传输文件的url。</p>
 <p>优点</p>
 <ul>
