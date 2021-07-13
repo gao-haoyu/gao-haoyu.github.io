@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"gao-haoyu.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+
+  <meta name="description" content="网络编程基础(3):Linux网络编程高级I&#x2F;O函数包含如下几个重点函数：pipe、dup&#x2F;dup2函数，readv&#x2F;writev、sendfile、mmap&#x2F;munmap、splice和tee函数，fcntl等注意：这一章节主要是对，文件描述符的操作，有利于传输数据效率的提高。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络编程高级I&#x2F;O函数">
+<meta property="og:url" content="https://gao-haoyu.github.io/2021/07/13/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%89%E7%AB%A0/index.html">
+<meta property="og:site_name" content="小高的学习基地">
+<meta property="og:description" content="网络编程基础(3):Linux网络编程高级I&#x2F;O函数包含如下几个重点函数：pipe、dup&#x2F;dup2函数，readv&#x2F;writev、sendfile、mmap&#x2F;munmap、splice和tee函数，fcntl等注意：这一章节主要是对，文件描述符的操作，有利于传输数据效率的提高。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/13/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%89%E7%AB%A0/f1.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/13/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%89%E7%AB%A0/f2.png">
+<meta property="article:published_time" content="2021-07-13T10:18:50.000Z">
+<meta property="article:modified_time" content="2021-07-13T12:07:36.627Z">
+<meta property="article:author" content="haoyu">
+<meta property="article:tag" content="网络编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gao-haoyu.github.io/2021/07/13/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%89%E7%AB%A0/f1.png">
+
+<link rel="canonical" href="https://gao-haoyu.github.io/2021/07/13/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%89%E7%AB%A0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>网络编程高级I/O函数 | 小高的学习基地</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小高的学习基地</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">高浩宇的学习记录</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://gao-haoyu.github.io/2021/07/13/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%89%E7%AB%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/photo.jpg">
+      <meta itemprop="name" content="haoyu">
+      <meta itemprop="description" content="清扬似玉须勤学">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小高的学习基地">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          网络编程高级I/O函数
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-13 18:18:50 / 修改时间：20:07:36" itemprop="dateCreated datePublished" datetime="2021-07-13T18:18:50+08:00">2021-07-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/socket%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">socket编程</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="网络编程基础-3-Linux网络编程高级I-O函数"><a href="#网络编程基础-3-Linux网络编程高级I-O函数" class="headerlink" title="网络编程基础(3):Linux网络编程高级I/O函数"></a>网络编程基础(3):Linux网络编程高级I/O函数</h2><p>包含如下几个重点函数：<strong>pipe、dup/dup2函数</strong>，<strong>readv/writev、sendfile、mmap/munmap、splice和tee函数</strong>，<strong>fcntl</strong>等<br>注意：这一章节主要是对，<strong>文件描述符的操作</strong>，有利于传输数据效率的提高。</p>
+<span id="more"></span>
+<h3 id="总体框架"><a href="#总体框架" class="headerlink" title="总体框架"></a><strong>总体框架</strong></h3><p>三类函数</p>
+<ul>
+<li>创建文件描述符的函数pipe、dup/dup2函数</li>
+<li>用于控制读写数据的函数readv/writev、sendfile、mmap/munmap、splice和tee函数。</li>
+<li>用于控制I/O行为和属性的函数fcntl函数</li>
+</ul>
+<h3 id="pipe函数"><a href="#pipe函数" class="headerlink" title="pipe函数"></a><strong>pipe函数</strong></h3><p>用于创建一个管道，用以实现进程间的通讯。<br>定义如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">pipe</span><span class="params">(<span class="keyword">int</span> fd[<span class="number">2</span>])</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">成功时返回0，并将一对打开的文件描述符填入其参数指向的数组</span></span><br><span class="line"><span class="comment">失败时返回-1，并设置errno</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>关键点</p>
+<ul>
+<li>fd[0]只能用于读取管道数据， fd[1]只能用于向管道写入数据。如果想要实现双向通信，应该使用两个管道。</li>
+<li>若调用read读取时，为0意味着读到了文件结束标志(EOF)。同时若针对该管道的读取端fd[0]引用计数为0（意味着没有需要管道数据的进程），则针对写fd[1]进行write操作将失败，并引发SIGPIPE信号。</li>
+<li>管道默认大小是65536字节，可通过fcntl函数进行后期更改。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//直接创建双向管道的函数socketpair</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">socketpair</span><span class="params">(<span class="keyword">int</span> domain, <span class="keyword">int</span> type, <span class="keyword">int</span> protocol, <span class="keyword">int</span> fd[<span class="number">2</span>])</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">domain只能采用AF_UNIX，因为是本地进程间通信。</span></span><br><span class="line"><span class="comment">此时创建得到的这对文件描述符都是既可读又可写。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="dup-dup2函数"><a href="#dup-dup2函数" class="headerlink" title="dup/dup2函数"></a><strong>dup/dup2函数</strong></h3><p>用于复制文件描述符</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">dup</span><span class="params">(<span class="keyword">int</span> fd)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">dup2</span><span class="params">(<span class="keyword">int</span> fd1, <span class="keyword">int</span> fd2)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">dup中的fd,是原有的fd文件描述符</span></span><br><span class="line"><span class="comment">dup2 中第二个参数为，指定的新的文件描述符。</span></span><br><span class="line"><span class="comment">该值将成为复制出的新的文件描述符值的最小值。</span></span><br><span class="line"><span class="comment">失败时返回-1，并设置errno</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="readv-amp-amp-writev函数"><a href="#readv-amp-amp-writev函数" class="headerlink" title="readv&amp;&amp;writev函数"></a><strong>readv&amp;&amp;writev函数</strong></h3><p>readv函数是从文件描述符读到分散的内存块中，即分散读。</p>
+<p>writev函数则将多块分散的内存数据一并写入文件描述符，即集中写。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/uio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">ssize_t</span> <span class="title">readv</span><span class="params">(<span class="keyword">int</span> fd, <span class="keyword">const</span> struct iovec* vector, <span class="keyword">int</span> count)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">ssize_t</span> <span class="title">writev</span><span class="params">(<span class="keyword">int</span> fd, <span class="keyword">const</span> struct iovec* vector, <span class="keyword">int</span> count)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="sendfile函数"><a href="#sendfile函数" class="headerlink" title="sendfile函数"></a>sendfile函数</h3><p>sendfile函数在两个文件描述符之间直接传递数据（完全在内核中操作），从而避免数据拷贝，效率更高。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/sendfile.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">ssize_t</span> <span class="title">sendfile</span><span class="params">(<span class="keyword">int</span> out_fd, <span class="keyword">int</span> in_fd, <span class="keyword">off_t</span>* offsert, <span class="keyword">size_t</span> count)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">out_fd:  待写入内容的文件描述符</span></span><br><span class="line"><span class="comment">in_fd:   待读出内容的文件描述符</span></span><br><span class="line"><span class="comment">offsert: 指定从读入文件流的哪个位置开始读，若为空，采用默认起始位置</span></span><br><span class="line"><span class="comment">count:   指定在文件描述符之间传输的字节数</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>关键点</p>
+<ul>
+<li>in_fd必须指向真实的文件，不能是socket和管道。</li>
+<li>out_fd则必须是socket。</li>
+</ul>
+<p>程序测试</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//服务器端程序</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdbool.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/sendfile.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>* argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>( argc &lt;= <span class="number">3</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;usage: %s ip_address port_number backlog\n&quot;</span>, <span class="built_in">basename</span>(argv[<span class="number">0</span>]));</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">char</span>* ip = argv[<span class="number">1</span>];</span><br><span class="line">	<span class="keyword">int</span> port = <span class="built_in">atoi</span>(argv[<span class="number">2</span>]);</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">char</span>* file_name = argv[<span class="number">3</span>];</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> filefd = <span class="built_in">open</span>(file_name, O_RDONLY);</span><br><span class="line">	<span class="built_in">assert</span>(filefd &gt; <span class="number">0</span>);</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">stat</span> <span class="title">stat_buf</span>;</span></span><br><span class="line">	<span class="built_in">fstat</span>(filefd, &amp;stat_buf);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> sock = <span class="built_in">socket</span>(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">	<span class="built_in">assert</span>(sock &gt;= <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">address</span>;</span></span><br><span class="line">	<span class="built_in">bzero</span>(&amp;address, <span class="built_in"><span class="keyword">sizeof</span></span>(address));</span><br><span class="line">	address.sin_family = AF_INET;</span><br><span class="line">	<span class="built_in">inet_pton</span>(AF_INET, ip, &amp;address.sin_addr);</span><br><span class="line">	address.sin_port = <span class="built_in">htons</span>(port);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> ret = <span class="built_in">bind</span>(sock, (struct sockaddr*)&amp;address, <span class="built_in"><span class="keyword">sizeof</span></span>(address));</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	ret = <span class="built_in">listen</span>(sock, <span class="number">5</span>);</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">client</span>;</span></span><br><span class="line">	<span class="keyword">socklen_t</span> client_addrlength = <span class="built_in"><span class="keyword">sizeof</span></span>(client);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> connfd = <span class="built_in">accept</span>(sock, (struct sockaddr*)&amp;client, &amp;client_addrlength);</span><br><span class="line">	<span class="keyword">if</span>(connfd &lt; <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;errno is: %d\n&quot;</span>, errno);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">       	&#123;</span><br><span class="line">		<span class="built_in">sendfile</span>(connfd, filefd, <span class="literal">NULL</span>, stat_buf.st_size);</span><br><span class="line">		<span class="built_in">close</span>(connfd);	</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">close</span>(sock);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>服务器端运行命令</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gao@gao-VirtualBox:~/桌面/net_code$ gcc SendFile.c -o send_file</span><br><span class="line">gao@gao-VirtualBox:~/桌面/net_code$ ./send_file <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span> <span class="number">9090</span> context.txt</span><br></pre></td></tr></table></figure>
+
+<p>利用telnet客户端进行测试</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gao@gao-VirtualBox:~/桌面/net_code$ telnet <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span> <span class="number">9090</span></span><br><span class="line">Trying <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>...</span><br><span class="line">Connected to <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>.</span><br><span class="line">Escape character is <span class="string">&#x27;^]&#x27;</span>.</span><br><span class="line">须知少时凌云志</span><br><span class="line">曾许人间第一流</span><br><span class="line">Connection closed by foreign host.</span><br></pre></td></tr></table></figure>
+
+<h3 id="mmap-amp-amp-munmap函数"><a href="#mmap-amp-amp-munmap函数" class="headerlink" title="mmap&amp;&amp;munmap函数"></a><strong>mmap&amp;&amp;munmap函数</strong></h3><p>mmap函数用于申请一段内存空间，可以将这段内存作为<strong>进程间通信的共享内存</strong>，也可以将文件直接映射到其中。</p>
+<p>munmap函数则释放由mmap函数创建的这段内存空间。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">mmap</span><span class="params">(<span class="keyword">void</span> *start, <span class="keyword">size_t</span> length, <span class="keyword">int</span> prot, <span class="keyword">int</span> flags, <span class="keyword">int</span> fd, <span class="keyword">off_t</span> offset)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">munmap</span><span class="params">(<span class="keyword">void</span> *start, <span class="keyword">size_t</span> length)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">start：可指定内存开始的位置，输入NULL会自动分配一个地址</span></span><br><span class="line"><span class="comment">length：指定内存段的长度</span></span><br><span class="line"><span class="comment">port：设置内存段的访问权限。</span></span><br><span class="line"><span class="comment">权限包含以下几种：PROT_READ（可读） PROT_WRITE（可写） PROT_EXEC（可执行） PROT_NONE（不可访问）</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">flags：控制内存段的行为</span></span><br><span class="line"><span class="comment">常见行为包含以下几种：</span></span><br><span class="line"><span class="comment">MAP_SHARED（进程间共享该内存） </span></span><br><span class="line"><span class="comment">MAP_PRIVATE（内存段为调用进程私有，不会反映到映射文件中） </span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">fd：被映射文件对应的文件描述符，一般通过open调用获得</span></span><br><span class="line"><span class="comment">offset：指定文件从何处开始映射。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">mmap函数成功时返回0，失败时返回MAP_FAILED，并设置errno。</span></span><br><span class="line"><span class="comment">munmap函数成功时返回0，失败时返回-1，并设置errno。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="splice函数"><a href="#splice函数" class="headerlink" title="splice函数"></a><strong>splice函数</strong></h3><p>splice函数用于在两个文件描述符之间移动数据。也是零拷贝操作。</p>
+<p>定义如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">ssize_t</span> <span class="title">splice</span><span class="params">(<span class="keyword">int</span> fd_src, <span class="keyword">loff_t</span> *off_src, <span class="keyword">int</span> fd_des, <span class="keyword">loff_t</span> *off_des, <span class="keyword">size_t</span> len, <span class="keyword">unsigned</span> <span class="keyword">int</span> flags)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">fd_in：待输入数据的文件描述符，如果是一个管道文件，那么off_in必须设为NULL</span></span><br><span class="line"><span class="comment">off_in：若不为管道文件，且不为NULL意味着从输入数据流的具体何处开始读取数据，设为NULL是默认位置。</span></span><br><span class="line"><span class="comment">fd_out：含义相近用于输出数据流</span></span><br><span class="line"><span class="comment">off_out：含义相近用于输出数据流</span></span><br><span class="line"><span class="comment">len：指定移动数据的长度</span></span><br><span class="line"><span class="comment">flags：控制数据如何移动，可设置为如下值：</span></span><br><span class="line"><span class="comment">SPLICE_F_MORE，给内核一个提示，后续的splice调用将读取更多的数据。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">fd_in和fd_out必须有一个是管道文件描述符。</span></span><br><span class="line"><span class="comment">函数调用成功时返回移动的字节数，可能为0，表示没有数据需要移动。</span></span><br><span class="line"><span class="comment">失败时，返回-1，并设置errno。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>程序测试</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _GNU_SOURCE 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdbool.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/sendfile.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>* argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>( argc &lt;= <span class="number">2</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;usage: %s ip_address port_number \n&quot;</span>, <span class="built_in">basename</span>(argv[<span class="number">0</span>]));</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">char</span>* ip = argv[<span class="number">1</span>];</span><br><span class="line">	<span class="keyword">int</span> port = <span class="built_in">atoi</span>(argv[<span class="number">2</span>]);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> sock = <span class="built_in">socket</span>(PF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">	<span class="built_in">assert</span>(sock &gt;= <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">address</span>;</span></span><br><span class="line">	<span class="built_in">bzero</span>(&amp;address, <span class="built_in"><span class="keyword">sizeof</span></span>(address));</span><br><span class="line">	address.sin_family = AF_INET;</span><br><span class="line">	<span class="built_in">inet_pton</span>(AF_INET, ip, &amp;address.sin_addr);</span><br><span class="line">	address.sin_port = <span class="built_in">htons</span>(port);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> ret = <span class="built_in">bind</span>(sock, (struct sockaddr*)&amp;address, <span class="built_in"><span class="keyword">sizeof</span></span>(address));</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	ret = <span class="built_in">listen</span>(sock, <span class="number">5</span>);</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">client</span>;</span></span><br><span class="line">	<span class="keyword">socklen_t</span> client_addrlength = <span class="built_in"><span class="keyword">sizeof</span></span>(client);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> connfd = <span class="built_in">accept</span>(sock, (struct sockaddr*)&amp;client, &amp;client_addrlength);</span><br><span class="line">	<span class="keyword">if</span>(connfd &lt; <span class="number">0</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;errno is: %d\n&quot;</span>, errno);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">       	&#123;</span><br><span class="line">		<span class="keyword">int</span> pipefd[<span class="number">2</span>];</span><br><span class="line">		<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line">		ret = <span class="built_in">pipe</span>(pipefd);	<span class="comment">//创建管道</span></span><br><span class="line"></span><br><span class="line">		<span class="comment">//将connfd上数据定向到管道</span></span><br><span class="line">		ret = <span class="built_in">splice</span>(connfd, <span class="literal">NULL</span>, pipefd[<span class="number">1</span>], <span class="literal">NULL</span>, <span class="number">32768</span>, SPLICE_F_MORE | SPLICE_F_MORE);</span><br><span class="line">		<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">//再将管道中数据，回传给connfd</span></span><br><span class="line">		ret = <span class="built_in">splice</span>(pipefd[<span class="number">0</span>], <span class="literal">NULL</span>, connfd, <span class="literal">NULL</span>, <span class="number">32768</span>, SPLICE_F_MORE | SPLICE_F_MORE);</span><br><span class="line">		<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line">		<span class="built_in">close</span>(connfd);	</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">close</span>(sock);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#服务器执行</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/net_code$ gcc Splice.c -o Splice</span><br><span class="line">gao@gao-VirtualBox:~/桌面/net_code$ ./Splice 127.0.0.1 9090</span><br><span class="line"></span><br><span class="line"><span class="comment">#telnet客户端测试</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/net_code$ telnet 127.0.0.1 9090</span><br><span class="line">Trying 127.0.0.1...</span><br><span class="line">Connected to 127.0.0.1.</span><br><span class="line">Escape character is <span class="string">&#x27;^]&#x27;</span>.</span><br><span class="line">须知少时凌云志 曾许人间第一流</span><br><span class="line">须知少时凌云志 曾许人间第一流</span><br><span class="line">Connection closed by foreign host.</span><br></pre></td></tr></table></figure>
+
+<h3 id="tee函数"><a href="#tee函数" class="headerlink" title="tee函数"></a><strong>tee函数</strong></h3><p>tee函数在<strong>两个管道文件描述符</strong>之间复制数据，也是零拷贝操作。</p>
+<p>定义如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">ssize_t</span> <span class="title">tee</span><span class="params">(<span class="keyword">int</span> fd_in, <span class="keyword">int</span> fd_out, <span class="keyword">size_t</span> len, <span class="keyword">unsigned</span> <span class="keyword">int</span> flags)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">含义可参考splice函数的参数。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>程序测试（利用splice和tee函数实现同时输出数据到终端和文件）</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _GNU_SOURCE 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdbool.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>* argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span>( argc != <span class="number">2</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;usage: %s ip_address port_number backlog\n&quot;</span>, <span class="built_in">basename</span>(argv[<span class="number">0</span>]));</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> filefd = <span class="built_in">open</span>(argv[<span class="number">1</span>], O_CREAT | O_WRONLY | O_TRUNC, <span class="number">0666</span>);</span><br><span class="line">	<span class="built_in">assert</span>(filefd &gt; <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//管道文件描述符，负责标准输入输出</span></span><br><span class="line">	<span class="keyword">int</span> pipefd_stdout[<span class="number">2</span>];</span><br><span class="line">	<span class="keyword">int</span> ret = <span class="built_in">pipe</span>(pipefd_stdout);</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">//管道文件描述符，负责实体文件</span></span><br><span class="line">	<span class="keyword">int</span> pipefd_file[<span class="number">2</span>];</span><br><span class="line">	ret = <span class="built_in">pipe</span>(pipefd_file);</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*将标准输入内容输入管道pipefd_stdout, 一端为管道，采用splice*/</span></span><br><span class="line">	ret = <span class="built_in">splice</span>(STDIN_FILENO, <span class="literal">NULL</span>, pipefd_stdout[<span class="number">1</span>], <span class="literal">NULL</span>, <span class="number">32768</span>, SPLICE_F_MORE | SPLICE_F_MORE);</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*将负责输入的管道内容，拷贝到负责实体文件的管道，双端管道，采用tee*/</span></span><br><span class="line">	ret = <span class="built_in">tee</span>(pipefd_stdout[<span class="number">0</span>], pipefd_file[<span class="number">1</span>], <span class="number">32768</span>, SPLICE_F_NONBLOCK);</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*将负责文件的管道输出定向到具体文件描述符，一端是管道，采用splice*/</span></span><br><span class="line">	ret = <span class="built_in">splice</span>(pipefd_file[<span class="number">0</span>], <span class="literal">NULL</span>, filefd, <span class="literal">NULL</span>, <span class="number">32768</span>, SPLICE_F_MORE | SPLICE_F_MORE);</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*将负责输入的管道内容，拷贝到标准输出，一端是管道，采用splice*/</span></span><br><span class="line">	ret = <span class="built_in">splice</span>(pipefd_stdout[<span class="number">0</span>], <span class="literal">NULL</span>, STDOUT_FILENO, <span class="literal">NULL</span>, <span class="number">32768</span>, SPLICE_F_MORE | SPLICE_F_MORE);</span><br><span class="line">	<span class="built_in">assert</span>(ret != <span class="number">-1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">close</span>(filefd);</span><br><span class="line">	<span class="built_in">close</span>(pipefd_stdout[<span class="number">0</span>]);</span><br><span class="line">	<span class="built_in">close</span>(pipefd_stdout[<span class="number">1</span>]);</span><br><span class="line">	<span class="built_in">close</span>(pipefd_file[<span class="number">0</span>]);</span><br><span class="line">	<span class="built_in">close</span>(pipefd_file[<span class="number">1</span>]);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#运行程序</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/net_code/第六章$ gcc Tee.c -o Tee</span><br><span class="line">gao@gao-VirtualBox:~/桌面/net_code/第六章$ ./Tee context.txt</span><br><span class="line">须知少时凌云志 曾许人间第一流   <span class="comment">##输入的内容</span></span><br><span class="line">须知少时凌云志 曾许人间第一流   <span class="comment">##控制台返回内容</span></span><br><span class="line">gao@gao-VirtualBox:~/桌面/net_code/第六章$ cat context.txt</span><br><span class="line">须知少时凌云志 曾许人间第一流   <span class="comment">##将内容写入文件</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="fcntl函数"><a href="#fcntl函数" class="headerlink" title="fcntl函数"></a><strong>fcntl函数</strong></h3><p>fcnti函数执行各种描述符的控制操作</p>
+<p>定义如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">fcntl</span><span class="params">(<span class="keyword">int</span> fd, <span class="keyword">int</span> cmd, ....)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>常用选项<br><img src="/2021/07/13/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%89%E7%AB%A0/f1.png" alt="常用选项"><br><img src="/2021/07/13/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%B8%89%E7%AB%A0/f2.png" alt="常用选项"></p>
+<p>经典的使用案例（设置文件描述符为非阻塞）</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">setnonblocking</span><span class="params">(<span class="keyword">int</span> fd)</span></span>&#123;</span><br><span class="line"><span class="comment">/*获取旧的状态标志*/</span></span><br><span class="line">	<span class="keyword">int</span> old_option = <span class="built_in">fcntl</span>(fd, F_GETFL);</span><br><span class="line"><span class="comment">/*更改为非阻塞状态*/</span></span><br><span class="line">	<span class="keyword">int</span> new_option = old_option | O_NONBLOCK;</span><br><span class="line">	<span class="built_in">fcntl</span>(fd, F_SETFL, new_option);</span><br><span class="line"><span class="comment">/*返回旧的状态，防止以后恢复*/</span></span><br><span class="line">	<span class="keyword">return</span> old_option;              </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//参考UNIX网络编程</span></span><br><span class="line"><span class="keyword">int</span> flag = <span class="built_in">fcntl</span>(fd, F_GETFL, <span class="number">0</span>);</span><br><span class="line">flag |= O_NONBLOCK;</span><br><span class="line"><span class="built_in">fcntl</span>(fd, F_SETFL, flag);</span><br><span class="line"><span class="comment">/*这种方式是直接设置，不考虑保留原状态*/</span></span><br><span class="line"><span class="comment">/*注意，不可以直接fcntl(fd, F_SETFL, O_NONBLOCK);，这会导致其余状态均丢失*/</span></span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/" rel="tag"># 网络编程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/09/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E6%80%BB%E7%BB%93%E5%9B%9E%E9%A1%BE/" rel="prev" title="设计模式之总结回顾">
+      <i class="fa fa-chevron-left"></i> 设计模式之总结回顾
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80-3-Linux%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E9%AB%98%E7%BA%A7I-O%E5%87%BD%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">网络编程基础(3):Linux网络编程高级I&#x2F;O函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E4%BD%93%E6%A1%86%E6%9E%B6"><span class="nav-number">1.1.</span> <span class="nav-text">总体框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pipe%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">pipe函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dup-dup2%E5%87%BD%E6%95%B0"><span class="nav-number">1.3.</span> <span class="nav-text">dup&#x2F;dup2函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#readv-amp-amp-writev%E5%87%BD%E6%95%B0"><span class="nav-number">1.4.</span> <span class="nav-text">readv&amp;&amp;writev函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sendfile%E5%87%BD%E6%95%B0"><span class="nav-number">1.5.</span> <span class="nav-text">sendfile函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mmap-amp-amp-munmap%E5%87%BD%E6%95%B0"><span class="nav-number">1.6.</span> <span class="nav-text">mmap&amp;&amp;munmap函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#splice%E5%87%BD%E6%95%B0"><span class="nav-number">1.7.</span> <span class="nav-text">splice函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tee%E5%87%BD%E6%95%B0"><span class="nav-number">1.8.</span> <span class="nav-text">tee函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fcntl%E5%87%BD%E6%95%B0"><span class="nav-number">1.9.</span> <span class="nav-text">fcntl函数</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="haoyu"
+      src="/images/photo.jpg">
+  <p class="site-author-name" itemprop="name">haoyu</p>
+  <div class="site-description" itemprop="description">清扬似玉须勤学</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">haoyu</span>
+</div>
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_pv">
+  本站访问数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
