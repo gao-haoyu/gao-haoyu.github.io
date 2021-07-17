@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"gao-haoyu.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+
+  <meta name="description" content="网络编程基础(5):高性能服务器程序框架 I&#x2F;O处理单元，四种I&#x2F;O模型和两种高效事件处理模式 逻辑单元，两种高并发模式，以及高效逻辑处理方式——有限状态机 池、锁的介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高性能服务器程序框架">
+<meta property="og:url" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/index.html">
+<meta property="og:site_name" content="小高的学习基地">
+<meta property="og:description" content="网络编程基础(5):高性能服务器程序框架 I&#x2F;O处理单元，四种I&#x2F;O模型和两种高效事件处理模式 逻辑单元，两种高并发模式，以及高效逻辑处理方式——有限状态机 池、锁的介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/1.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/2.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/3.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/4.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/5.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/6.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/7.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/8.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/9.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/10.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/11.png">
+<meta property="og:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/12.png">
+<meta property="article:published_time" content="2021-07-17T12:51:12.000Z">
+<meta property="article:modified_time" content="2021-07-17T13:06:43.247Z">
+<meta property="article:author" content="haoyu">
+<meta property="article:tag" content="网络编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/1.png">
+
+<link rel="canonical" href="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>高性能服务器程序框架 | 小高的学习基地</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小高的学习基地</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">高浩宇的学习记录</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://gao-haoyu.github.io/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/photo.jpg">
+      <meta itemprop="name" content="haoyu">
+      <meta itemprop="description" content="清扬似玉须勤学">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小高的学习基地">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          高性能服务器程序框架
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-17 20:51:12 / 修改时间：21:06:43" itemprop="dateCreated datePublished" datetime="2021-07-17T20:51:12+08:00">2021-07-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/socket%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">socket编程</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="网络编程基础-5-高性能服务器程序框架"><a href="#网络编程基础-5-高性能服务器程序框架" class="headerlink" title="网络编程基础(5):高性能服务器程序框架"></a>网络编程基础(5):高性能服务器程序框架</h2><ul>
+<li>I/O处理单元，四种I/O模型和两种高效事件处理模式</li>
+<li>逻辑单元，两种高并发模式，以及高效逻辑处理方式——有限状态机</li>
+<li>池、锁的介绍<span id="more"></span>
+<h3 id="主要内容"><a href="#主要内容" class="headerlink" title="主要内容"></a>主要内容</h3></li>
+<li>I/O处理单元，四种I/O模型和两种高效事件处理模式</li>
+<li>逻辑单元，两种高并发模式，以及高效逻辑处理方式——有限状态机</li>
+</ul>
+<h3 id="服务器模型"><a href="#服务器模型" class="headerlink" title="服务器模型"></a>服务器模型</h3><h4 id="C-S模型"><a href="#C-S模型" class="headerlink" title="C/S模型"></a>C/S模型</h4><ul>
+<li><p>服务逻辑：服务器开启后。首先创建一个或多个监听socket，之后调用bind函数绑定地址，再之后调用listen等待连接。服务器使用I/O复用技术来监听客户端请求，当监听到请求之后便分配给其一个逻辑单元去处理该请求。</p>
+</li>
+<li><p>模式示意图<br><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/1.png"></p>
+</li>
+<li><p>模式逻辑图<br><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/2.png"></p>
+</li>
+<li><p>模型分析<br>C/S模式适合资源集中性的场合，并且实现简单。但是正是由于资源相对集中，所有的客户端都和服务器直接建立连接，当访问量过大时，所有客户都将得到很慢的响应。</p>
+</li>
+</ul>
+<h4 id="P2P模式"><a href="#P2P模式" class="headerlink" title="P2P模式"></a>P2P模式</h4><ul>
+<li><p>服务逻辑<br>每一台机器在消耗服务的同时也给别人提供服务，这样资源可以充分、自由地共享。</p>
+</li>
+<li><p>模型示意图<br><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/3.png"></p>
+</li>
+</ul>
+<p>原始地P2P模型，能够看到，主机之间很难确定哪一个是自己需要的。因此在一些架构中，增加了发现服务器，用来提供专门的发现服务，使得每个客户尽快找到资源。</p>
+<p><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/4.png"></p>
+<h3 id="服务器编程框架"><a href="#服务器编程框架" class="headerlink" title="服务器编程框架"></a>服务器编程框架</h3><ul>
+<li><p>基础框架是固定的：主要包含三个部分，I/O处理单元、逻辑单元、存储单元（可选）。<br><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/5.png"></p>
+</li>
+<li><p>各单元功能描述</p>
+</li>
+</ul>
+<p>上述的框架既可以描述一台服务器，也可以用来描述一个服务器机群。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">模块                单个服务器程序                  服务器机群</span><br><span class="line">I/O处理单元       处理客户连接，读写网络数据      作为接入服务器，实现负载均衡</span><br><span class="line">逻辑单元          业务进程或线程                  逻辑服务器</span><br><span class="line">网络存储单元      本地数据库、文件或缓存          数据库服务器</span><br><span class="line">请求队列          各单元之间的通信方式            各服务器之间的永久TCP连接</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>I/O处理单元<br>是服务器管理客户连接的模块，它负责的工作有：等待并接受新的客户连接，接受客户数据，将服务器响应数据返回给客户端。</p>
+</li>
+<li><p>逻辑单元<br>通常是一个进程或者线程，它分析并处理客户数据，然后将结果传递给I/O处理单元或者直接发送给数据端。</p>
+</li>
+<li><p>网络存储单元<br>非必须单元，依据情况选择。</p>
+</li>
+<li><p>请求队列<br>I/O处理单元接收到客户请求时，需要以某种方式来通知一个逻辑单元进行处理。同样，多个逻辑单元请求同一个存储单元的信息，也需要采用某种机制来协调处理竞态关系。请求队列通常被实现为池的一部分，后面会具体聊池这个话题。</p>
+</li>
+</ul>
+<h3 id="i-o模型"><a href="#i-o模型" class="headerlink" title="i/o模型"></a>i/o模型</h3><ul>
+<li><p>五种IO模型：阻塞、非阻塞、IO复用、信号驱动、异步。</p>
+<p>  一些关键点</p>
+</li>
+<li><p>阻塞的I/O在无法立即完成时，会被操作系统挂起，直到等待的事件发生为止。socket的基础API中，可能被阻塞的系统调用包括：accept、send、recv和connect。</p>
+</li>
+<li><p>非阻塞式I/O执行则是系统调用后立即返回，不管事件是否发生，如果事件没有立即发生，这些系统调用就返回-1.因此，非阻塞式I/O通常配合I/O通知机制来一起使用（如I/O复用和SIGIO信号）</p>
+</li>
+<li><p>I/O复用函数是select、poll和epoll，I/O函数本身是阻塞的，其提高效率的原因在于函数可以同时监听多个I/O事件</p>
+</li>
+<li><p>具体的信号的使用后面会具体介绍。</p>
+</li>
+<li><p>异步部分暂不考虑</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">I/O模型                         读写操作&amp;阻塞阶段</span><br><span class="line">阻塞I/O       程序阻塞于读写函数</span><br><span class="line">I/O复用       程序阻塞于I/O复用系统调用。对I/O本身的读写操作是非阻塞的。</span><br><span class="line">SIGIO信号     信号触发读写就绪事件，用户程序执行读写操作，程序没有阻塞阶段</span><br><span class="line">异步I/O       内核执行读写操作并触发读写完成事件，程序没有阻塞阶段。</span><br></pre></td></tr></table></figure>
+
+<h3 id="两种高效的事件处理模式"><a href="#两种高效的事件处理模式" class="headerlink" title="两种高效的事件处理模式"></a>两种高效的事件处理模式</h3><p>服务器程序通常需要处理三类事件：<br>I/O事件、信号事件、定时事件。后续将分章节具体讨论。从整体来说，存在两种高效的事件处理模式：Reactor模式&amp;Proactor模式。同步I/O模型通常用于实现Reactor模式。</p>
+<h4 id="Reactor模式"><a href="#Reactor模式" class="headerlink" title="Reactor模式"></a>Reactor模式</h4><p>其处理逻辑是，它要求主线程只负责监听文件描述符上是否有事件发生，有的话就立即通知工作线程，不做任何实质性工作。</p>
+<p><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/6.png"></p>
+<p>工作流程分析</p>
+<ul>
+<li>主线程往epoll内核事件表中注册socket上的读就绪事件</li>
+<li>主线程调用epoll_wait等待socket上有数据可读</li>
+<li>当socket上有数据可读时，epoll_wait通知主线程，主线程则将socket可读事件放入请求队列</li>
+<li>睡眠在请求队列上的某个工作线程被唤醒，它从socket读取数据，并处理客户请求，然后往epoll内核事件表中注册该socket上的写就绪事件</li>
+<li>主线程调用epoll_wait等待socket可写</li>
+<li>当socket可写时，epoll_wait通知主线程，主线程将socket可写事件放入请求队列</li>
+<li>睡眠在请求队列上的某个工作线程被唤醒，它往socket上写入服务器处理客户请求的结果</li>
+</ul>
+<h4 id="Proactor模式"><a href="#Proactor模式" class="headerlink" title="Proactor模式"></a>Proactor模式</h4><p>其处理逻辑，主线程和内核来处理所有的I/O操作，工作线程仅仅负责业务逻辑。</p>
+<p><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/7.png"></p>
+<p>工作流程分析</p>
+<ul>
+<li>主线程调用aio_read函数向内核注册socket上的读完成事件，并告诉内核用户读缓冲区的位置，以及读操作完成时如何通知应用程序</li>
+<li>主线程继续处理其他逻辑</li>
+<li>当socket上的数据被读入用户缓冲区后，内核将向应用程序发送一个信号，以通知应用程序数据已经发送完毕</li>
+<li>应用程序预先定义好的信号处理函数选择一个工作线程来处理客户请求，工作线程处理完客户请求之后，调用aio_write函数向内核注册socket上的写完成事件，并告诉内核用户写缓冲区的位置，以及写操作完成时如何通知应用程序。</li>
+<li>主线程继续处理其他逻辑</li>
+<li>当用户缓冲区的数据被写入socket之后，内核向应用程序发送一个信号，通知数据已经发送完毕。</li>
+<li>应用程序预先定义好的信号处理函数选择一个工作线程来做善后处理，比如决定是否关闭socket</li>
+</ul>
+<h4 id="模拟Proactor模式"><a href="#模拟Proactor模式" class="headerlink" title="模拟Proactor模式"></a>模拟Proactor模式</h4><p>其处理逻辑：主线程执行数据读写操作，读写完成后，主线程向工作线程通知这一”完成事件“，工作线程直接得到数据读写结果，进行逻辑处理。</p>
+<p><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/8.png"></p>
+<p>工作流程分析</p>
+<ul>
+<li>主线程往epoll内核事件表注册socket上的都就绪事件</li>
+<li>主线程调用epoll_wait等待socket上有数据可读</li>
+<li>当socket上有数据可读时，epoll_wait通知主线程，主线程从socket循环读取数据，知道没有更多的数据可读，然后将数据封装为一个请求对象并插入请求队列</li>
+<li>睡眠在请求队列上的某个工作线程被唤醒，它将获得请求对象并处理客户请求，然后往epoll内核事件表中注册socket上的写就绪事件</li>
+<li>主线程调用epoll_wait等待socket可写</li>
+<li>当socket可写时，epoll_wait通知主线程，主线程往socket上写入服务器处理客户请求的结果。</li>
+</ul>
+<h3 id="两种高效的并发模式"><a href="#两种高效的并发模式" class="headerlink" title="两种高效的并发模式"></a>两种高效的并发模式</h3><p>并发编程的目的是让程序”同时“执行多个任务。</p>
+<ul>
+<li>如果程序是计算密集型的，并发编程并没有优势。</li>
+<li>但如果是I/O密集型的，采用并发模式，将显著提高CPU利用率。<br>从实现方式上说，多进程和多线程两种手段，后面也会详细介绍。本节主要介绍宏观上并发模式。<br>并发模式是指I/O处理单元和多个逻辑单元之间协调完成任务的方法。<br>服务器主要有两种并发编程模式：半同步/半异步模式、领导者/追随者模式。</li>
+</ul>
+<h4 id="半同步-半异步"><a href="#半同步-半异步" class="headerlink" title="半同步/半异步"></a>半同步/半异步</h4><p>首先明确一点，这里的同步/异步不同于I/O模型里面的同步异步</p>
+<ul>
+<li>I/O中同步异步是以内核向应用程序通知的是哪种I/O事件（是就绪事件还是完成事件），以及该由谁完成I/O读写（是内核还是应用程序）。</li>
+<li>并发模式中，”同步“是指程序完全按照代码顺序执行；”异步“是指程序的执行需要由系统事件来驱动。常见的系统事件包括：中断、信号等。</li>
+</ul>
+<p>图示如下</p>
+<p><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/9.png"></p>
+<p>按照同步方式运行的线程称为同步线程，异步方式运行的称为异步线程。明显异步线程无阻塞，执行效率高。但编写异步线程难度大，调试复杂。因此服务器的开发，同时采用同步线程和异步线程来实现，即半同步/半异步模式。</p>
+<p>具体方案</p>
+<p>半同步/半异步模式中，同步线程用于处理客户逻辑，充当逻辑单元的实现方案。异步线程用于处理I/O事件，充当I/O处理单元的实现方案。异步线程监听到客户端请求后，就将其封装成请求对象并插入进请求队列中，请求队列将通知某个工作在同步模式下的工作线程来读取并处理该请求对象。</p>
+<p>在实际的使用中半同步/半异步模式存在多种变体。其中一种变体称为<strong>半同步/半反应堆</strong>模式，如下图所示</p>
+<p><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/10.png"></p>
+<p>工作流程</p>
+<ul>
+<li>异步线程只有一个，由主线程来充当。它负责监听所有的socket上的事件。</li>
+<li>如果监听socket上有可读事件发送，即有新的连接请求到来，主线程就接受之以得到新的连接socket，然后往epoll内核事件表中注册该socket上的读写事件。</li>
+<li>如果监听到socket上有读写事件发生，即有新的客户请求到来或有数据要发送至客户端，主线程就将该连接socket插入请求队列中。所有工作线程都睡眠在请求队列上，当有任务到来时，他们将通过竞争来获得任务的接管权。</li>
+</ul>
+<p>分析这种模式可以看出，主线程插入的请求队列的是就绪的连接socket，这就要求工作线程自己从socket上读取客户请求和往socket写入服务器应答。所以事件处理模式的角度看：这是Reactor模式。</p>
+<p>这种模式的问题在于</p>
+<ul>
+<li>主线程和工作线程共享请求队列。主线程往请求队列添加任务，或者工作线程从请求队列中取出任务，都需要对请求队列加锁保护，从而白白耗费CPU时间。</li>
+<li>每个工作线程在同一时间只能处理一个客户请求。如果客户数量过多，而工作线程较少，则请求队列中将堆积很多任务对象，客户端响应将越来越慢。如果通过增加工作线程来解决这一问题，则工作线程的切换也将耗费大量CPU时间。</li>
+</ul>
+<p>为进一步提高并发效率，提出一种更为<strong>高效的半同步/半异步模式</strong></p>
+<p><img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/11.png"></p>
+<ul>
+<li>主线程只管理监听socket，连接socket由工作线程来管理。当有新连接到来时，主线程就接受之并将新返回的连接socket派发给某个工作线程。</li>
+<li>此后该新socket上的任何I/O操作都由被选中的工作线程来处理，直到客户关闭连接。主线程向工作线程派发socket的最简单的方式就是往<strong>它和工作线程之间的管道里写数据</strong>，工作线程检测到管道上有数据可读是，就分析是否是一个新的客户连接请求，如果是，则把该新socket上的读写事件注册到自己的epoll内核事件表中。</li>
+<li>可以看到每个线程都维持自己的事件循环，它们各自独立地监听不同的事件。因此，在这个模式中，每个线程都工作在异步模式下。</li>
+</ul>
+<h4 id="领导者-追随者模式"><a href="#领导者-追随者模式" class="headerlink" title="领导者/追随者模式"></a>领导者/追随者模式</h4><p>其工作逻辑是多个工作线程轮流获得事件源集合，轮流监听、分发并处理事件的一种模式。在任意时间点，程序都仅有一个领导者线程，它负责监听I/O事件。而其他线程都是追随者，它们休眠在线程池中等待成为新的领导者。当前的领导者如果检测到I/O事件，首先要从线程池中推选出新的领导者线程，然后处理I/O事件。此时，新的领导者等待新的I/O事件，而原来的领导者则处理I/O事件，二者实现并发。</p>
+<p>领导者/追随者模式包含如下几个组件：句柄集、线程集、事件处理器、具体的事件处理器</p>
+<ul>
+<li><p>句柄集：管理众多句柄（句柄：用于表示I/O资源，Linux下通常就是一个文件描述符）。它使用wait_for_event来监听这些句柄上的I/O事件，并将其中的就绪事件通知给领导者线程。领导者对事件进行处理。</p>
+</li>
+<li><p>线程集：这个组件是所有工作线程（包括领导者线程和追随者线程）的管理者。它负责个线程之间的同步，以及新的领导者线程的推选。线程集中的线程在任一时间必处于如下三种状态之一：</p>
+<p>  Leader：线程当前处于领导者身份，负责等待句柄集上的I/O事件。</p>
+<p>  Processing：线程正在处理事件。领导者检测到I/O事件之后，可以转移到Processing状态来处理该事件，并调用promote_new_leader方法推选新的领导者；也可以指定其他追随者来处理事件，此时领导者的地位不变。当处于Processing状态的线程处理完事件之后，如果当前线程集没有领导者，则它将成为新的领导者，否则它就直接转变为追随者。</p>
+<p>  Follower：线程当前处于追随者的身份，通过调用线程集的join方法等待成为新的领导者，也可以被当前的领导者指定来处理新的任务。</p>
+<p>  <img src="/2021/07/17/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E4%BA%94%E7%AB%A0/12.png"></p>
+<p>  需要注意的是。领导者线程推选新的领导者和追随者等待成为新的领导者这两个操作都将修改线程集，因此线程集提供一个成员Synchronizer来同步这两个操作，以避免竞态条件。</p>
+</li>
+</ul>
+<p>由于领导者线程自己监听I/O事件并处理客户请求，因而领导者/追随者模式不需要在线程之间传递任何额外的数据，也无需像半同步/半反应堆模式那样在线程之间同步对请求队列的访问。但领导者/追随者的一个明显缺点是仅支持一个事件源集合，因此也无法让工作线程独立地管理多个客户连接。</p>
+<h3 id="有限状态机"><a href="#有限状态机" class="headerlink" title="有限状态机"></a>有限状态机</h3><p>有限状态机是逻辑单元内部的一种高效编程方法。</p>
+<p>通过代码来解析这个概念：</p>
+<p>状态独立的有限状态机</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">STATE_MACHINE</span>(Package _pack)</span><br><span class="line">&#123;</span><br><span class="line">	PackageType _type = _pack.<span class="built_in">GetType</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in"><span class="keyword">switch</span></span>(_type)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">case</span> type_A:</span><br><span class="line">				 <span class="built_in">process_process_A</span>(_pack);</span><br><span class="line">				 <span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> type_B:</span><br><span class="line">				 <span class="built_in">process_process_B</span>(_pack);</span><br><span class="line">				 <span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">A与B这两种状态之间互相独立，状态之间没有相互转移。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>带有状态转移的有限状态机</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">STATE_MACHINE</span>()</span><br><span class="line">&#123;</span><br><span class="line">	State Cur_State = type_A;</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span>(Cur_State != type_c)</span><br><span class="line">&#123;</span><br><span class="line">	Package _pack = <span class="built_in">GetNewPackage</span>();</span><br><span class="line"></span><br><span class="line">	<span class="built_in"><span class="keyword">switch</span></span>(Cur_State)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">case</span> type_A:</span><br><span class="line">				 <span class="built_in">process_package_A</span>(_pack);</span><br><span class="line">				 Cur_State = type_B;</span><br><span class="line">				 <span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> type_B:</span><br><span class="line">				 <span class="built_in">process_package_B</span>(_pack);</span><br><span class="line">         Cur_State = type_C;</span><br><span class="line">				 <span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">该状态机包含三个状态，中间有状态的自动转移。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ul>
+<li>关于池</li>
+</ul>
+<p>常用到的池有：内存池、进程池、线程池、连接池。</p>
+<ul>
+<li><p>其中，内存池通常用于socket的接收缓存和发送缓冲。</p>
+</li>
+<li><p>进程池和线程池则是并发编程的常用技法，提前在池中放置若干进程或线程，需要使用时，直接取用。</p>
+</li>
+<li><p>连接池通常用于服务器或者服务器机群的内部永久连接。例如，每一个逻辑单元都可能频繁访问本地某个数据库，为了提高效率，可以考虑使用连接池。</p>
+</li>
+<li><p>关于数据复制</p>
+<p>  主要针对的情形：用户代码和内核之间，如果可以直接对socket或者文件读入的数据进行内核上的处理，就可以避免复制，直接采用”零拷贝“函数sendfile来提高效率。</p>
+<p>  若两个进程之间需要传递大量的数据时应该优先考虑共享内存，尽可能避免管道和消息队列来传递。</p>
+</li>
+<li><p>关于上下文切换和锁</p>
+<p>  并发程序必须考虑上下文切换的问题，及其导致的系统开销。即便是I/O密集型的服务器，也不应该使用过多的工作线程。因此多考虑I/O复用，一个线程同时处理多个客户连接。</p>
+<p>  共享资源的加锁，锁通常是导致服务器效率低下的一个因素。如果服务器有更好的解决方案，就应该避免使用锁。如果服务器必须使用锁，那么则可以考虑锁的粒度，比如使用读写锁。当所有工作线程都只读取一块共享内存的内容时，读写锁并不会增加额外开销，只有当其中某一个工作线程需要写这块内存时，系统才会去上锁。</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/" rel="tag"># 网络编程</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/14/%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E7%AC%AC%E5%9B%9B%E7%AB%A0/" rel="prev" title="Linux服务器程序框架">
+      <i class="fa fa-chevron-left"></i> Linux服务器程序框架
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80-5-%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%A8%8B%E5%BA%8F%E6%A1%86%E6%9E%B6"><span class="nav-number">1.</span> <span class="nav-text">网络编程基础(5):高性能服务器程序框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E5%86%85%E5%AE%B9"><span class="nav-number">1.1.</span> <span class="nav-text">主要内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">服务器模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#C-S%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.1.</span> <span class="nav-text">C&#x2F;S模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#P2P%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.2.</span> <span class="nav-text">P2P模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BC%96%E7%A8%8B%E6%A1%86%E6%9E%B6"><span class="nav-number">1.3.</span> <span class="nav-text">服务器编程框架</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#i-o%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.4.</span> <span class="nav-text">i&#x2F;o模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E9%AB%98%E6%95%88%E7%9A%84%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.5.</span> <span class="nav-text">两种高效的事件处理模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Reactor%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.5.1.</span> <span class="nav-text">Reactor模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Proactor%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.5.2.</span> <span class="nav-text">Proactor模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E6%8B%9FProactor%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.5.3.</span> <span class="nav-text">模拟Proactor模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E9%AB%98%E6%95%88%E7%9A%84%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.6.</span> <span class="nav-text">两种高效的并发模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%8A%E5%90%8C%E6%AD%A5-%E5%8D%8A%E5%BC%82%E6%AD%A5"><span class="nav-number">1.6.1.</span> <span class="nav-text">半同步&#x2F;半异步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%86%E5%AF%BC%E8%80%85-%E8%BF%BD%E9%9A%8F%E8%80%85%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.6.2.</span> <span class="nav-text">领导者&#x2F;追随者模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E9%99%90%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="nav-number">1.7.</span> <span class="nav-text">有限状态机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">1.8.</span> <span class="nav-text">其他</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="haoyu"
+      src="/images/photo.jpg">
+  <p class="site-author-name" itemprop="name">haoyu</p>
+  <div class="site-description" itemprop="description">清扬似玉须勤学</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">haoyu</span>
+</div>
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_pv">
+  本站访问数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
